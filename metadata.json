@@ -1,0 +1,8 @@
+{
+  "name": "SSD OneVoice27 Proposal",
+  "description": "Strategic project and budget proposal workbook guiding directors to develop, align, and export proposals for treasurer review.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

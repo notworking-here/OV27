@@ -1,0 +1,574 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Public health/connection check
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 160 && id.matches('^[a-zA-Z0-9_.@\\-]+$');
+    }
+
+    // Require non-anonymous Firebase Authentication for all authenticated operations
+    function isSignedIn() {
+      return request.auth != null &&
+        (!('firebase' in request.auth.token) || request.auth.token.firebase.sign_in_provider != 'anonymous');
+    }
+
+    // Strict verified Super Admin bootstrap allowlist (no substring wildcards)
+    function isSuperAdminEmail(email) {
+      return email != null && (
+        email.lower() == 'astanyer@adventist.asia' ||
+        email.lower() == 'adpsalms272017@gmail.com'
+      );
+    }
+
+    function hasVerifiedSuperAdminToken() {
+      return isSignedIn() &&
+        request.auth.token.email != null &&
+        request.auth.token.email_verified == true &&
+        isSuperAdminEmail(request.auth.token.email);
+    }
+
+    function hasUserProfile() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function currentUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        hasVerifiedSuperAdminToken() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (hasUserProfile() && currentUserData().role == 'super_admin')
+      );
+    }
+
+    // Operational Union officers who can edit/approve proposals (excludes read-only division_liaison)
+    function isOperationalOfficer() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (
+          hasUserProfile() &&
+          (
+            currentUserData().role == 'coordinator' ||
+            currentUserData().role == 'treasurer'
+          )
+        )
+      );
+    }
+
+    function isDivisionLiaison() {
+      return isSignedIn() && hasUserProfile() && currentUserData().role == 'division_liaison';
+    }
+
+    function isSsdHqUnion(u) {
+      return u == '' ||
+        u == 'SSD' ||
+        u == 'Southern Asia-Pacific Division' ||
+        u == 'Southern Asia-Pacific Division (SSD Headquarters)' ||
+        u == 'SSD - Southern Asia-Pacific Division';
+    }
+
+    function isDivisionTreasurer() {
+      return isSignedIn() && hasUserProfile() && currentUserData().role == 'treasurer' && (
+        !('union' in currentUserData()) ||
+        isSsdHqUnion(currentUserData().union)
+      );
+    }
+
+    // HQ Officers or multi-territory officers/invitees (>= 12 territories or inviteeAllUnions) who query across the division
+    function hasDivisionWideScope() {
+      return isSignedIn() && hasUserProfile() &&
+        (
+          (
+            (currentUserData().role == 'coordinator' || currentUserData().role == 'treasurer') &&
+            (
+              (
+                (!('union' in currentUserData()) || isSsdHqUnion(currentUserData().union)) &&
+                (!('assignedUnions' in currentUserData()) || !(currentUserData().assignedUnions is list) || currentUserData().assignedUnions.size() == 0)
+              ) ||
+              (
+                'assignedUnions' in currentUserData() &&
+                currentUserData().assignedUnions is list &&
+                currentUserData().assignedUnions.size() >= 12
+              )
+            )
+          ) ||
+          (
+            currentUserData().role == 'division_liaison' &&
+            (
+              ('inviteeAllUnions' in currentUserData() && currentUserData().inviteeAllUnions == true) ||
+              ('assignedUnions' in currentUserData() && currentUserData().assignedUnions is list && currentUserData().assignedUnions.size() >= 12) ||
+              ('inviteeUnions' in currentUserData() && currentUserData().inviteeUnions is list && currentUserData().inviteeUnions.size() >= 12) ||
+              (
+                'assignedUnions' in currentUserData() && currentUserData().assignedUnions is list &&
+                'inviteeUnions' in currentUserData() && currentUserData().inviteeUnions is list &&
+                (currentUserData().assignedUnions.size() + currentUserData().inviteeUnions.size()) >= 12
+              )
+            )
+          )
+        );
+    }
+
+    function matchesUnion(userUnion, targetUnion) {
+      return userUnion == targetUnion ||
+        ((userUnion == 'SAC' || userUnion == 'Singapore Conference') && (targetUnion == 'SAC' || targetUnion == 'Singapore Conference')) ||
+        ((userUnion == 'ECPUC' || userUnion == 'East Central Philippine Union Conference') && (targetUnion == 'ECPUC' || targetUnion == 'East Central Philippine Union Conference')) ||
+        ((userUnion == 'SEUM' || userUnion == 'SAUM' || userUnion == 'Southeastern Asia Union Mission' || userUnion == 'Southeastern Asia Union Mission (Oversees and Brunei)' || userUnion == 'Southeastern Asia Union Mission (Overseas and Brunei)') && (targetUnion == 'SEUM' || targetUnion == 'SAUM' || targetUnion == 'Southeastern Asia Union Mission' || targetUnion == 'Southeastern Asia Union Mission (Oversees and Brunei)' || targetUnion == 'Southeastern Asia Union Mission (Overseas and Brunei)')) ||
+        ((userUnion == 'CIUM' || userUnion == 'Central Indonesia Union Mission') && (targetUnion == 'CIUM' || targetUnion == 'Central Indonesia Union Mission')) ||
+        ((userUnion == 'EIUC' || userUnion == 'East Indonesia Union Conference') && (targetUnion == 'EIUC' || targetUnion == 'East Indonesia Union Conference')) ||
+        ((userUnion == 'WIUM' || userUnion == 'West Indonesia Union Mission') && (targetUnion == 'WIUM' || targetUnion == 'West Indonesia Union Mission')) ||
+        ((userUnion == 'NLPUM' || userUnion == 'NLUM' || userUnion == 'Northern Luzon Philippine Union Mission') && (targetUnion == 'NLPUM' || targetUnion == 'NLUM' || targetUnion == 'Northern Luzon Philippine Union Mission')) ||
+        ((userUnion == 'SLPUM' || userUnion == 'SLUM' || userUnion == 'Southern Luzon Philippine Union Mission') && (targetUnion == 'SLPUM' || targetUnion == 'SLUM' || targetUnion == 'Southern Luzon Philippine Union Mission')) ||
+        ((userUnion == 'SWPUC' || userUnion == 'Southwestern Philippine Union Conference') && (targetUnion == 'SWPUC' || targetUnion == 'Southwestern Philippine Union Conference')) ||
+        ((userUnion == 'SePUM' || userUnion == 'SEPUM' || userUnion == 'Southeastern Philippine Union Mission') && (targetUnion == 'SePUM' || targetUnion == 'SEPUM' || targetUnion == 'Southeastern Philippine Union Mission')) ||
+        ((userUnion == 'WCPUM' || userUnion == 'West Central Philippine Union Mission') && (targetUnion == 'WCPUM' || targetUnion == 'West Central Philippine Union Mission')) ||
+        ((userUnion == 'MAUM' || userUnion == 'Malaysia Union Mission') && (targetUnion == 'MAUM' || targetUnion == 'Malaysia Union Mission')) ||
+        ((userUnion == 'MYUM' || userUnion == 'Myanmar Union Mission') && (targetUnion == 'MYUM' || targetUnion == 'Myanmar Union Mission')) ||
+        ((userUnion == 'TLM' || userUnion == 'Timor-Leste Mission') && (targetUnion == 'TLM' || targetUnion == 'Timor-Leste Mission'));
+    }
+
+    function listMatchesUnion(unionList, targetUnion) {
+      return unionList is list && (
+        targetUnion in unionList ||
+        (unionList.size() > 0 && matchesUnion(unionList[0], targetUnion)) ||
+        (unionList.size() > 1 && matchesUnion(unionList[1], targetUnion)) ||
+        (unionList.size() > 2 && matchesUnion(unionList[2], targetUnion)) ||
+        (unionList.size() > 3 && matchesUnion(unionList[3], targetUnion)) ||
+        (unionList.size() > 4 && matchesUnion(unionList[4], targetUnion)) ||
+        (unionList.size() > 5 && matchesUnion(unionList[5], targetUnion)) ||
+        (unionList.size() > 6 && matchesUnion(unionList[6], targetUnion)) ||
+        (unionList.size() > 7 && matchesUnion(unionList[7], targetUnion)) ||
+        (unionList.size() > 8 && matchesUnion(unionList[8], targetUnion)) ||
+        (unionList.size() > 9 && matchesUnion(unionList[9], targetUnion)) ||
+        (unionList.size() > 10 && matchesUnion(unionList[10], targetUnion)) ||
+        (unionList.size() > 11 && matchesUnion(unionList[11], targetUnion)) ||
+        (unionList.size() > 12 && matchesUnion(unionList[12], targetUnion)) ||
+        (unionList.size() > 13 && matchesUnion(unionList[13], targetUnion))
+      );
+    }
+
+    // Strict Step 4 Voting Liaison check (ONLY assignedUnions or concrete non-HQ primary union — NEVER inviteeUnions/inviteeAllUnions)
+    function liaisonHasVotingForUnion(targetUnion) {
+      return isDivisionLiaison() && (
+        ('union' in currentUserData() && !isSsdHqUnion(currentUserData().union) && matchesUnion(currentUserData().union, targetUnion)) ||
+        ('assignedUnions' in currentUserData() && listMatchesUnion(currentUserData().assignedUnions, targetUnion))
+      );
+    }
+
+    // Invitee (View & Comment Only) Liaison check
+    function liaisonHasInviteeForUnion(targetUnion) {
+      return isDivisionLiaison() && (
+        ('inviteeAllUnions' in currentUserData() && currentUserData().inviteeAllUnions == true) ||
+        ('inviteeUnions' in currentUserData() && listMatchesUnion(currentUserData().inviteeUnions, targetUnion))
+      );
+    }
+
+    function userMatchesUnion(targetUnion) {
+      return hasUserProfile() && (
+        (
+          currentUserData().role == 'division_liaison'
+            ? (liaisonHasVotingForUnion(targetUnion) || liaisonHasInviteeForUnion(targetUnion))
+            : (
+                matchesUnion(currentUserData().union, targetUnion) ||
+                ('assignedUnions' in currentUserData() && listMatchesUnion(currentUserData().assignedUnions, targetUnion)) ||
+                hasDivisionWideScope()
+              )
+        )
+      );
+    }
+
+    function isAuthorizedForUnion(targetUnion) {
+      return isSignedIn() && (
+        isAdmin() ||
+        isDivisionTreasurer() ||
+        (!isDivisionLiaison() && userMatchesUnion(targetUnion))
+      );
+    }
+
+    // Voting Division Liaison: may record Step 4 votes, activity log entries, and review notes on their Voting Unions
+    function isVotingLiaisonUpdatingStep4(targetUnion) {
+      return liaisonHasVotingForUnion(targetUnion) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviewNotes', 'reviewerNotes', 'liaisonVotes', 'activityLog', 'reviewedBy', 'reviewedAt', 'updatedAt']);
+    }
+
+    // Invitee Division Liaison: may ONLY post/read-receipt Review Notes — strictly blocked from modifying liaisonVotes or activityLog
+    function isInviteeLiaisonUpdatingNotesOnly(targetUnion) {
+      return liaisonHasInviteeForUnion(targetUnion) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviewNotes', 'reviewerNotes', 'updatedAt']);
+    }
+
+    // Verifies that a first-time user claiming a pre-provisioned officer/liaison role was genuinely provisioned by an Admin
+    function isVerifiedPreprovisionedClaim() {
+      return 'reconciledFromDocId' in request.resource.data &&
+        request.resource.data.reconciledFromDocId is string &&
+        request.resource.data.reconciledFromDocId.size() <= 128 &&
+        request.resource.data.reconciledFromDocId != request.auth.uid &&
+        request.auth.token.email != null &&
+        exists(/databases/$(database)/documents/users/$(request.resource.data.reconciledFromDocId)) &&
+        'email' in get(/databases/$(database)/documents/users/$(request.resource.data.reconciledFromDocId)).data &&
+        get(/databases/$(database)/documents/users/$(request.resource.data.reconciledFromDocId)).data.email.lower() == request.auth.token.email.lower() &&
+        request.resource.data.role == get(/databases/$(database)/documents/users/$(request.resource.data.reconciledFromDocId)).data.role &&
+        request.resource.data.role != 'super_admin';
+    }
+
+    function isValidUserPayload(data) {
+      return data.uid is string && data.uid.size() <= 128 &&
+        data.email is string && data.email.size() <= 254 &&
+        data.displayName is string && data.displayName.size() <= 200 &&
+        (!('union' in data) || (data.union is string && data.union.size() <= 200)) &&
+        (!('role' in data) || data.role in ['user', 'coordinator', 'treasurer', 'division_liaison', 'super_admin']) &&
+        (!('assignedUnions' in data) || (data.assignedUnions is list && data.assignedUnions.size() <= 20)) &&
+        (!('inviteeUnions' in data) || (data.inviteeUnions is list && data.inviteeUnions.size() <= 20)) &&
+        (!('inviteeAllUnions' in data) || data.inviteeAllUnions is bool) &&
+        (!('isLiaison' in data) || data.isLiaison is bool) &&
+        (!('liaisonVotingUnions' in data) || (data.liaisonVotingUnions is list && data.liaisonVotingUnions.size() <= 20));
+    }
+
+    // Admins registry
+    match /admins/{adminId} {
+      allow read: if isSignedIn() && (adminId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    function hasProjectCodeUnchanged() {
+      return (!('projectCode' in request.resource.data) && !('projectCode' in resource.data)) ||
+        ('projectCode' in resource.data && 'projectCode' in request.resource.data && request.resource.data.projectCode == resource.data.projectCode);
+    }
+
+    function isValidProjectCodeField(data) {
+      return !('projectCode' in data) ||
+        data.projectCode == null ||
+        (
+          data.projectCode is map &&
+          (!('orgId' in data.projectCode) || data.projectCode.orgId == null || (data.projectCode.orgId is string && data.projectCode.orgId.size() <= 32)) &&
+          (!('projectId' in data.projectCode) || data.projectCode.projectId == null || (data.projectCode.projectId is string && data.projectCode.projectId.size() <= 40)) &&
+          (!('composite' in data.projectCode) || data.projectCode.composite == null || (data.projectCode.composite is string && data.projectCode.composite.size() <= 120)) &&
+          (!('phase' in data.projectCode) || data.projectCode.phase == null || data.projectCode.phase in ['Planning', 'Implementation', 'Monitoring', 'Final Evaluation', 'Closure']) &&
+          (!('status' in data.projectCode) || data.projectCode.status == null || data.projectCode.status in ['Active', 'Closed', 'On Hold'])
+        );
+    }
+
+    // Public non-secret settings (budget allocations, KPI caps, API metadata, and sequential project ID counters)
+    match /settings/{settingId} {
+      allow read: if settingId in ['budget_allocations', 'kpi_caps', 'api_config_meta'] ||
+        (settingId == 'project_id_counters' && isSignedIn()) ||
+        isAdmin();
+      allow write: if isAdmin() || (
+        settingId == 'project_id_counters' &&
+        isDivisionTreasurer() &&
+        request.resource.data.keys().hasAll(['counters']) &&
+        request.resource.data.counters is map &&
+        request.resource.data.counters.size() <= 30 &&
+        (!('updatedAt' in request.resource.data) || (request.resource.data.updatedAt is string && request.resource.data.updatedAt.size() <= 64))
+      );
+    }
+
+    // Strictly Admin-Only Private Settings (holds the live GC API secret key)
+    match /private_settings/{settingId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Public Monitor aggregates:
+    // - 'division_summary' internal cache is restricted to signed-in users only
+    // - Admin-generated tokenized capability snapshots (>= 24 chars) allow direct get without listing
+    match /public_monitor/{docId} {
+      allow get: if isValidId(docId) && (
+        (docId == 'division_summary' && isSignedIn()) ||
+        (docId != 'division_summary' && docId.size() >= 24)
+      );
+      allow list: if false;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Read-only Step 5 authorized export snapshots keyed by SHA-256(apiKey + ':gc_export_v1')
+    // List is strictly disabled; only callers possessing the secret GC API key can derive the document ID
+    match /gc_api_snapshots/{docId} {
+      allow get: if isValidId(docId) && docId.size() == 64 && docId.matches('^[a-f0-9]{64}$');
+      allow list: if false;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // User profiles (PII-isolated and hardened against self-role escalation or confirmed union hopping)
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (
+        userId == request.auth.uid ||
+        isAdmin() ||
+        isOperationalOfficer() ||
+        isDivisionLiaison() ||
+        (request.auth.token.email != null && 'email' in resource.data && (resource.data.email == request.auth.token.email || resource.data.email == request.auth.token.email.lower())) ||
+        ('role' in resource.data && resource.data.role in ['division_liaison', 'coordinator', 'treasurer', 'super_admin'])
+      );
+
+      allow list: if isSignedIn() && (
+        isAdmin() ||
+        isOperationalOfficer() ||
+        isDivisionLiaison() ||
+        (request.auth.token.email != null && 'email' in resource.data && (resource.data.email == request.auth.token.email || resource.data.email == request.auth.token.email.lower())) ||
+        ('role' in resource.data && resource.data.role in ['division_liaison', 'coordinator', 'treasurer', 'super_admin'])
+      );
+
+      allow create: if isSignedIn() && isValidId(userId) && isValidUserPayload(request.resource.data) && (
+        isAdmin() ||
+        (
+          request.auth.uid == userId &&
+          request.resource.data.uid == request.auth.uid &&
+          (
+            !('role' in request.resource.data) ||
+            request.resource.data.role == 'user' ||
+            hasVerifiedSuperAdminToken() ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          (
+            !('assignedUnions' in request.resource.data) ||
+            request.resource.data.assignedUnions.size() == 0 ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          (
+            !('inviteeUnions' in request.resource.data) ||
+            request.resource.data.inviteeUnions.size() == 0 ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          (
+            !('inviteeAllUnions' in request.resource.data) ||
+            request.resource.data.inviteeAllUnions == false ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          (
+            !('isLiaison' in request.resource.data) ||
+            request.resource.data.isLiaison == false ||
+            hasVerifiedSuperAdminToken()
+          ) &&
+          (
+            !('liaisonVotingUnions' in request.resource.data) ||
+            request.resource.data.liaisonVotingUnions.size() == 0 ||
+            hasVerifiedSuperAdminToken()
+          )
+        )
+      );
+
+      allow update: if isSignedIn() && isValidId(userId) && isValidUserPayload(request.resource.data) && (
+        isAdmin() ||
+        (
+          request.auth.uid == userId &&
+          request.resource.data.uid == request.auth.uid &&
+          // Block self-assigning elevated roles
+          (
+            (!('role' in request.resource.data) && !('role' in resource.data)) ||
+            ('role' in resource.data && request.resource.data.role == resource.data.role) ||
+            (!('role' in resource.data) && request.resource.data.role == 'user') ||
+            hasVerifiedSuperAdminToken() ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          // Block self-modifying assignedUnions, inviteeUnions, and inviteeAllUnions
+          (
+            !('assignedUnions' in request.resource.data) ||
+            ('assignedUnions' in resource.data && request.resource.data.assignedUnions == resource.data.assignedUnions) ||
+            (!('assignedUnions' in resource.data) && request.resource.data.assignedUnions.size() == 0) ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          (
+            !('inviteeUnions' in request.resource.data) ||
+            ('inviteeUnions' in resource.data && request.resource.data.inviteeUnions == resource.data.inviteeUnions) ||
+            (!('inviteeUnions' in resource.data) && request.resource.data.inviteeUnions.size() == 0) ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          (
+            !('inviteeAllUnions' in request.resource.data) ||
+            ('inviteeAllUnions' in resource.data && request.resource.data.inviteeAllUnions == resource.data.inviteeAllUnions) ||
+            (!('inviteeAllUnions' in resource.data) && request.resource.data.inviteeAllUnions == false) ||
+            isVerifiedPreprovisionedClaim()
+          ) &&
+          // Block non-admins from self-modifying isLiaison or liaisonVotingUnions
+          (
+            !('isLiaison' in request.resource.data) ||
+            ('isLiaison' in resource.data && request.resource.data.isLiaison == resource.data.isLiaison) ||
+            (!('isLiaison' in resource.data) && request.resource.data.isLiaison == false)
+          ) &&
+          (
+            !('liaisonVotingUnions' in request.resource.data) ||
+            ('liaisonVotingUnions' in resource.data && request.resource.data.liaisonVotingUnions == resource.data.liaisonVotingUnions) ||
+            (!('liaisonVotingUnions' in resource.data) && request.resource.data.liaisonVotingUnions.size() == 0)
+          ) &&
+          // Lock primary union once unionConfirmed == true (unless reconciling an Admin-provisioned record)
+          (
+            !('unionConfirmed' in resource.data && resource.data.unionConfirmed == true && 'union' in resource.data && resource.data.union != '') ||
+            request.resource.data.union == resource.data.union ||
+            isVerifiedPreprovisionedClaim()
+          )
+        )
+      );
+
+      allow delete: if isAdmin() || (
+        isSignedIn() &&
+        isValidId(userId) &&
+        userId != request.auth.uid &&
+        'email' in resource.data &&
+        request.auth.token.email != null &&
+        resource.data.email.lower() == request.auth.token.email.lower()
+      );
+    }
+
+    // Proposals collection (Authenticated territory-scoped/owner-scoped reads + Terminal Step 5 Governance Lock)
+    match /proposals/{proposalId} {
+      allow get: if isValidId(proposalId) && isSignedIn() && (
+        isAdmin() ||
+        isDivisionTreasurer() ||
+        hasDivisionWideScope() ||
+        resource.data.userId == request.auth.uid ||
+        (request.auth.token.email != null && 'userEmail' in resource.data && (resource.data.userEmail == request.auth.token.email || resource.data.userEmail == request.auth.token.email.lower())) ||
+        (request.auth.token.email != null && 'pointOfContact' in resource.data && resource.data.pointOfContact is map && 'email' in resource.data.pointOfContact && resource.data.pointOfContact.email.lower() == request.auth.token.email.lower()) ||
+        userMatchesUnion(resource.data.union)
+      );
+
+      allow list: if isSignedIn() && (
+        isAdmin() ||
+        isDivisionTreasurer() ||
+        hasDivisionWideScope() ||
+        resource.data.userId == request.auth.uid ||
+        (request.auth.token.email != null && 'userEmail' in resource.data && (resource.data.userEmail == request.auth.token.email || resource.data.userEmail == request.auth.token.email.lower())) ||
+        userMatchesUnion(resource.data.union)
+      );
+
+      allow create: if isSignedIn() && isValidId(proposalId) &&
+        (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 500)) &&
+        (!('reviewNotes' in request.resource.data) || (request.resource.data.reviewNotes is list && request.resource.data.reviewNotes.size() <= 250)) &&
+        (!('activityLog' in request.resource.data) || (request.resource.data.activityLog is list && request.resource.data.activityLog.size() <= 100)) &&
+        isValidProjectCodeField(request.resource.data) &&
+        (
+          isAdmin() ||
+          (
+            (!('projectCode' in request.resource.data) || request.resource.data.projectCode == null) &&
+            (
+              (!isDivisionLiaison() && request.resource.data.userId == request.auth.uid) ||
+              isAuthorizedForUnion(request.resource.data.union)
+            )
+          )
+        );
+
+      allow update: if isSignedIn() && isValidId(proposalId) &&
+        (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 500)) &&
+        (!('reviewNotes' in request.resource.data) || (request.resource.data.reviewNotes is list && request.resource.data.reviewNotes.size() <= 250)) &&
+        (!('activityLog' in request.resource.data) || (request.resource.data.activityLog is list && request.resource.data.activityLog.size() <= 100)) &&
+        isValidProjectCodeField(request.resource.data) &&
+        (
+          isAdmin() ||
+          (
+            isDivisionTreasurer() &&
+            (
+              hasProjectCodeUnchanged() ||
+              !('divisionApproval' in resource.data) ||
+              request.resource.data.divisionApproval != resource.data.divisionApproval
+            )
+          ) ||
+          (
+            // Terminal Step 5 Governance Lock: Once authorized by SSD OV27 Committee, non-Division accounts cannot revert status or divisionApproval
+            !(
+              'divisionApproval' in resource.data &&
+              resource.data.divisionApproval is map &&
+              'authorized' in resource.data.divisionApproval &&
+              resource.data.divisionApproval.authorized == true &&
+              (
+                request.resource.data.status != resource.data.status ||
+                request.resource.data.divisionApproval != resource.data.divisionApproval
+              )
+            ) &&
+            // Non-admin accounts cannot mutate GC projectCode (OrgID, Project ID, Phase, Status, Lock)
+            hasProjectCodeUnchanged() &&
+            (
+              (
+                !isDivisionLiaison() &&
+                (
+                  !('userId' in resource.data) ||
+                  resource.data.userId == request.auth.uid ||
+                  ('userEmail' in resource.data && request.auth.token.email != null && resource.data.userEmail.lower() == request.auth.token.email.lower()) ||
+                  ('pointOfContact' in resource.data && resource.data.pointOfContact is map && 'email' in resource.data.pointOfContact && request.auth.token.email != null && resource.data.pointOfContact.email.lower() == request.auth.token.email.lower())
+                )
+              ) ||
+              isAuthorizedForUnion(resource.data.union) ||
+              isVotingLiaisonUpdatingStep4(resource.data.union) ||
+              isInviteeLiaisonUpdatingNotesOnly(resource.data.union)
+            )
+          )
+        );
+
+      allow delete: if isSignedIn() && isValidId(proposalId) && (
+        isAdmin() ||
+        (!isDivisionLiaison() && resource.data.userId == request.auth.uid) ||
+        (isOperationalOfficer() && userMatchesUnion(resource.data.union))
+      );
+    }
+
+    // Notifications collection (Scoped by targetAudience & tamper-resistant)
+    match /notifications/{notificationId} {
+      allow get: if isSignedIn() && isValidId(notificationId) && (
+        isAdmin() ||
+        isOperationalOfficer() ||
+        isDivisionLiaison() ||
+        (
+          'targetAudience' in resource.data &&
+          resource.data.targetAudience is list && (
+            ('UID:' + request.auth.uid) in resource.data.targetAudience ||
+            (request.auth.token.email != null && ('EMAIL:' + request.auth.token.email.lower()) in resource.data.targetAudience)
+          )
+        )
+      );
+
+      allow list: if isSignedIn() && (
+        isAdmin() ||
+        isOperationalOfficer() ||
+        isDivisionLiaison() ||
+        (
+          'targetAudience' in resource.data &&
+          resource.data.targetAudience is list && (
+            ('UID:' + request.auth.uid) in resource.data.targetAudience ||
+            (request.auth.token.email != null && ('EMAIL:' + request.auth.token.email.lower()) in resource.data.targetAudience)
+          )
+        )
+      );
+
+      allow create: if isSignedIn() && isValidId(notificationId) &&
+        request.resource.data.title is string && request.resource.data.title.size() <= 400 &&
+        request.resource.data.message is string && request.resource.data.message.size() <= 1500 &&
+        (!('readBy' in request.resource.data) || (request.resource.data.readBy is list && request.resource.data.readBy.size() <= 200));
+
+      allow update: if isSignedIn() && isValidId(notificationId) && (
+        isAdmin() ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'dismissedBy']) &&
+          (!('readBy' in request.resource.data) || (request.resource.data.readBy is list && request.resource.data.readBy.size() <= 300)) &&
+          (!('dismissedBy' in request.resource.data) || (request.resource.data.dismissedBy is list && request.resource.data.dismissedBy.size() <= 300))
+        )
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // Activity logs collection for lifecycle audit tracking
+    match /activity_logs/{logId} {
+      allow read: if isSignedIn() && (isAdmin() || isOperationalOfficer() || isDivisionLiaison());
+
+      allow create: if isSignedIn() && isValidId(logId) &&
+        request.resource.data.details is string && request.resource.data.details.size() <= 2000 &&
+        (
+          !('actorUid' in request.resource.data) ||
+          request.resource.data.actorUid == null ||
+          request.resource.data.actorUid == '' ||
+          request.resource.data.actorUid == request.auth.uid
+        );
+
+      allow update, delete: if isAdmin();
+    }
+  }
+}

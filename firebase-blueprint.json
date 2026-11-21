@@ -1,0 +1,253 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role-based access information and union affiliation",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique Firebase Auth user ID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "User full name" },
+        "role": {
+          "type": "string",
+          "description": "User authorization role",
+          "enum": ["super_admin", "treasurer", "coordinator", "division_liaison", "user"]
+        },
+        "union": { "type": "string", "description": "Primary assigned union conference, mission, or attached field" },
+        "assignedUnions": {
+          "type": "array",
+          "description": "Official Step 4 voting union territories for division liaisons, or multi-union territories for coordinators/authors"
+        },
+        "inviteeUnions": {
+          "type": "array",
+          "description": "Optional union territories where a division liaison acts as an Invitee (view and comment only, no Step 4 voting)"
+        },
+        "inviteeAllUnions": {
+          "type": "boolean",
+          "description": "Whether a division liaison has division-wide Invitee (view and comment only) access across all other unions"
+        },
+        "isLiaison": {
+          "type": "boolean",
+          "description": "Whether a super_admin (Division Admin) also acts as a Division Liaison with Step 4 voting power over specific unions"
+        },
+        "liaisonVotingUnions": {
+          "type": "array",
+          "description": "Canonical unions where a Division Admin with isLiaison=true holds formal Step 4 Liaison voting power"
+        },
+        "department": { "type": "string", "description": "User department" },
+        "institution": { "type": "string", "description": "User institution" },
+        "unionConfirmed": { "type": "boolean", "description": "Whether primary union affiliation has been confirmed" },
+        "reconciledFromDocId": { "type": "string", "description": "Optional pre-provisioned user doc ID verified during first login" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last updated timestamp" }
+      },
+      "required": ["uid", "email", "displayName", "role", "union"]
+    },
+    "Proposal": {
+      "title": "Proposal",
+      "description": "Strategic project and budget proposal for OneVoice27",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Proposal ID" },
+        "userId": { "type": "string", "description": "UID of author user" },
+        "userEmail": { "type": "string", "description": "Email of author user" },
+        "userName": { "type": "string", "description": "Name of author user" },
+        "pointOfContact": { "type": "object", "description": "Primary project director / point of contact details" },
+        "union": { "type": "string", "description": "Union affiliation of the proposal" },
+        "title": { "type": "string", "description": "Project title", "maxLength": 300 },
+        "strategicFocus": { "type": "string", "description": "Strategic focus area" },
+        "divisionProject": { "type": "string", "description": "Division project alignment" },
+        "otherDivisionProject": { "type": "string", "description": "Custom division project details if Other selected" },
+        "overview": { "type": "string", "description": "Project overview description" },
+        "goal": { "type": "string", "description": "Project goal" },
+        "outcomes": { "type": "string", "description": "Expected outcomes" },
+        "kpiType": { "type": "string", "description": "Selected KPI category" },
+        "kpiNumber": { "type": "string", "description": "Target KPI number" },
+        "kpiDescription": { "type": "string", "description": "KPI metric description" },
+        "kpiRationale": { "type": "string", "description": "KPI rationale" },
+        "hadSimilarProject2Years": { "type": "string", "description": "Past 2-year similar project flag (Yes/No)" },
+        "status": { "type": "string", "description": "Proposal workflow state", "enum": ["draft", "submitted", "under_review", "approved"] },
+        "reviewedBy": { "type": "string", "description": "Name of certifying reviewer or officer" },
+        "reviewedAt": { "type": "string", "description": "Timestamp of review action" },
+        "reviewerNotes": { "type": "string", "description": "Summary review feedback note" },
+        "reviewNotes": {
+          "type": "array",
+          "description": "Thread of timestamped reviewer and liaison remarks including optional readinessRating and section actionItems"
+        },
+        "unionApproval": {
+          "type": "object",
+          "description": "Step 3 Union Committee Action metadata including vote number and date"
+        },
+        "liaisonVotes": {
+          "type": "array",
+          "description": "Step 4 Division Liaison review recommendations, readinessRating, deficientCriteria, section actionItems, and formal votes"
+        },
+        "divisionApproval": {
+          "type": "object",
+          "description": "Step 5 SSD OV27 Committee final project authorization metadata including certifying officer, date, and reference"
+        },
+        "activityLog": {
+          "type": "array",
+          "description": "Chronological lifecycle audit trail across Steps 1 to 6 including project coding, phase, and status changes"
+        },
+        "focusId": { "type": "number", "description": "External GC numeric strategic focus ID (1 to 3)" },
+        "strategicProjectId": { "type": "number", "description": "External GC numeric strategic project ID (1 to 7)" },
+        "projectCode": {
+          "type": "object",
+          "description": "GC project coding, locking metadata, and lifecycle phase/status tracking ({ composite, orgId, projectId, phase, status, locked, lockedAt, lockedBy, lockedByEmail })"
+        },
+        "deliverables": { "type": "string", "description": "Tangible project deliverables" },
+        "audienceEDetails": { "type": "string", "description": "Details when Audience E is selected" },
+        "pointsOfIntegration": { "type": "string", "description": "Inter-departmental integration" },
+        "createdAt": { "type": "string", "description": "Creation ISO timestamp" },
+        "updatedAt": { "type": "string", "description": "Updated ISO timestamp" }
+      },
+      "required": ["id", "userId", "union", "title"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Application event notifications for proposals and actions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Notification ID" },
+        "type": { "type": "string", "description": "Event type" },
+        "title": { "type": "string", "description": "Notification headline" },
+        "message": { "type": "string", "description": "Detail message" },
+        "proposalId": { "type": "string", "description": "Associated proposal ID" },
+        "targetAudience": { "type": "array", "description": "Indexed audience tokens for scoped notification queries" },
+        "readBy": { "type": "array", "description": "List of user identifiers who read the notification" },
+        "dismissedBy": { "type": "array", "description": "List of user identifiers who dismissed the notification" },
+        "createdAt": { "type": "string", "description": "Timestamp" }
+      },
+      "required": ["id", "type", "title", "message"]
+    },
+    "AdminRole": {
+      "title": "AdminRole",
+      "description": "Marker document designating a super admin UID",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User UID" },
+        "email": { "type": "string", "description": "Admin email" }
+      },
+      "required": ["uid", "email"]
+    },
+    "BudgetAllocationSetting": {
+      "title": "BudgetAllocationSetting",
+      "description": "Union budget allocations and strategic KPI caps defined by administrators",
+      "type": "object",
+      "properties": {
+        "allocations": { "type": "object", "description": "Map of union names to allocated amounts in USD" },
+        "matchingPledges": { "type": "object", "description": "Map of union names to matching pledge amounts in USD" },
+        "updatedAt": { "type": "string", "description": "Timestamp" },
+        "updatedBy": { "type": "string", "description": "Admin UID or email" }
+      },
+      "required": ["allocations"]
+    },
+    "PublicMonitorSummary": {
+      "title": "PublicMonitorSummary",
+      "description": "Aggregated division-wide metrics snapshot for executive stakeholder quickview",
+      "type": "object",
+      "properties": {
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last snapshot sync" },
+        "totalProposals": { "type": "number", "description": "Total proposals count" },
+        "approvedCount": { "type": "number", "description": "Total approved proposals count" }
+      },
+      "required": ["updatedAt"]
+    },
+    "ActivityLogEntry": {
+      "title": "ActivityLogEntry",
+      "description": "Audit log record for proposal lifecycle events",
+      "type": "object",
+      "properties": {
+        "proposalId": { "type": "string", "description": "Target proposal ID" },
+        "proposalTitle": { "type": "string", "description": "Proposal title" },
+        "union": { "type": "string", "description": "Union territory" },
+        "actionType": { "type": "string", "description": "Lifecycle event type" },
+        "actorUid": { "type": "string", "description": "Authenticated Firebase UID of actor" },
+        "actorName": { "type": "string", "description": "User who performed the action" },
+        "actorEmail": { "type": "string", "description": "Actor email" },
+        "actorRole": { "type": "string", "description": "Actor role" },
+        "summary": { "type": "string", "description": "Human-readable audit summary" },
+        "field": { "type": "string", "description": "Optional changed field identifier (e.g. orgId, projectId, phase, status)" },
+        "previousValue": { "type": "string", "description": "Optional previous value prior to mutation" },
+        "newValue": { "type": "string", "description": "Optional new value after mutation" },
+        "timestamp": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["proposalId", "actionType", "timestamp"]
+    },
+    "GcApiPrivateConfig": {
+      "title": "GcApiPrivateConfig",
+      "description": "Admin-restricted external GC API secret key configuration",
+      "type": "object",
+      "properties": {
+        "apiKey": { "type": "string", "description": "Active secret API key for GC read-only integration" },
+        "enabled": { "type": "boolean", "description": "Whether external API endpoint is enabled" },
+        "orgId": { "type": "string", "description": "Organization identifier (AT1111)" },
+        "approvedOnly": { "type": "boolean", "description": "Approved-only filter lock" },
+        "updatedAt": { "type": "string", "description": "Last rotated/updated ISO timestamp" },
+        "updatedBy": { "type": "string", "description": "Admin email who updated configuration" }
+      },
+      "required": ["apiKey", "enabled", "orgId"]
+    },
+    "ProjectIdCounterSetting": {
+      "title": "ProjectIdCounterSetting",
+      "description": "Atomic per-union sequential project ID counter map stored at /settings/project_id_counters",
+      "type": "object",
+      "properties": {
+        "counters": { "type": "object", "description": "Map of union acronym to highest allocated sequence integer" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last counter increment" }
+      },
+      "required": ["counters"]
+    },
+    "GcApiSnapshot": {
+      "title": "GcApiSnapshot",
+      "description": "Precomputed Step 5 authorized proposals export payload keyed by SHA-256 hash of secret API key",
+      "type": "object",
+      "properties": {
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last export sync" },
+        "orgId": { "type": "string", "description": "Organization identifier" },
+        "items": { "type": "array", "description": "Serialized Step 5 authorized ExternalProposalApiListItem entries" },
+        "envelopesById": { "type": "object", "description": "Map of proposal or project ID to ExternalProposalEnvelope" }
+      },
+      "required": ["updatedAt", "items"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User account profile and role details"
+    },
+    "/proposals/{proposalId}": {
+      "schema": "Proposal",
+      "description": "Authenticated collection of strategic OneVoice27 proposals"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "In-app notifications feed"
+    },
+    "/admins/{userId}": {
+      "schema": "AdminRole",
+      "description": "Collection of admin role marker records for security rules evaluation"
+    },
+    "/settings/{settingId}": {
+      "schema": "BudgetAllocationSetting",
+      "description": "Configuration documents (budget_allocations, kpi_caps, api_config_meta hash) and atomic project_id_counters"
+    },
+    "/private_settings/{settingId}": {
+      "schema": "GcApiPrivateConfig",
+      "description": "Strictly admin-only secret configurations including the live GC API key and public monitor share token"
+    },
+    "/public_monitor/{docId}": {
+      "schema": "PublicMonitorSummary",
+      "description": "Aggregated stakeholder monitor snapshot gated by secret capability token or authenticated division_summary"
+    },
+    "/gc_api_snapshots/{docId}": {
+      "schema": "GcApiSnapshot",
+      "description": "Capability-hashed Step 5 authorized external export payload for server API consumption"
+    },
+    "/activity_logs/{logId}": {
+      "schema": "ActivityLogEntry",
+      "description": "Audit trail of proposal submissions, reviews, and committee approvals"
+    }
+  }
+}

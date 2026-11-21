@@ -1,0 +1,1393 @@
+﻿OneVoice27 Proposal Portal
+Development Request — Editable Strategic Focus During Realignment
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Applies to:  Proposal edit mode while a proposal is in the Realignment stage
+Version:  1.0 — Draft for estimation
+ 
+1.  Background & the defect
+When a proposal is sent back for realignment, the submitter opens it in edit mode to make the requested changes. Comparing the read (view) layout with the edit layout reveals a gap: the Strategic Focus block appears in the read view but is missing from the edit view, so those fields cannot currently be changed during realignment.
+The affected fields (present in the read view, absent in edit mode) are:
+●      Strategic Focus (e.g., “Prayer, Training, and Inspiration”)
+●      What strategic objective is this? (e.g., “1.5 – Cultivate Mission Learning and Innovation”)
+●      What strategic activity is this? (the strategic-activity description)
+●      Accountable (the accountable person, e.g., name and email)
+This request makes the Strategic Focus block editable in edit mode during realignment, restricted to users in GC departments and institutions.
+  E1  Editable Strategic Focus during realignment 
+Expose the Strategic Focus block in proposal edit mode when a proposal is in realignment, and let authorized GC users edit it, so requested realignment changes to strategy can actually be made.
+E1-S1  Show and edit Strategic Focus fields in edit mode
+As a GC department / institution user editing a proposal sent back for realignment,
+I want the Strategic Focus fields to appear and be editable in edit mode,
+so that I can make the strategy changes requested during realignment.
+Acceptance criteria
+●      In edit mode, the Strategic Focus block is shown with the same fields that appear in the read view: Strategic Focus, What strategic objective is this?, What strategic activity is this?, and Accountable.
+●      Each field is populated with its current saved value and is editable using the appropriate input (dropdown vs. free text vs. person picker) consistent with how it was originally captured.
+●      Edits save with the rest of the proposal and persist on resubmission.
+●      The read view and edit view now show the same set of Strategic Focus fields — no field that is visible when reading is missing when editing.
+●      Each change to a Strategic Focus field is recorded in the change log (field, from → to, user, timestamp).
+Note: This closes the discrepancy between the read layout (which shows Strategic Focus) and the edit layout (which currently omits it).
+E1-S2  Restrict editing to GC departments and institutions
+As an organization,
+I want only users in GC departments and institutions to edit the Strategic Focus,
+so that strategic alignment stays under the control of the appropriate GC entities.
+Acceptance criteria
+●      Users who belong to a GC department / institution can edit the Strategic Focus fields during realignment.
+●      Users who do not belong to a GC department / institution do not get editable Strategic Focus fields — they continue to see those fields as read-only.
+●      The permission is enforced server-side, not just hidden in the UI, so a non-GC user cannot save changes to these fields via direct request.
+●      Behavior is unchanged for all other proposal fields and for stages other than realignment.
+ 
+End of request — OneVoice27 Proposal Portal, editable Strategic Focus during realignment.
+  
+
+
+
+  
+
+OneVoice27 Proposal Portal
+Development Request — Settings: Manage Entities, Allocations & User Assignment
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  September 22, 2026
+Applies to:  Settings — allocations section and user management
+Related:  Division budget allocation; Initiative tags; Move between departments
+Version:  1.0 — Draft for estimation
+ 
+1.  Background & purpose
+The allocations area of Settings needs to be self-service so an admin can maintain the organizational structure the portal runs on without a code change. Specifically, the admin needs to add the entities that carry budget — departments, divisions, institutions, and global projects — and create new allocations for them as needed.
+Alongside this, users need to be assignable to these entities elsewhere in Settings, so that once a user is added to a department (or other entity) they can go in and submit their application/proposal forms under it.
+2.  Definitions
+●      Entity — a budget-carrying organizational unit: a department, division, institution, or global project.
+●      Allocation — a budget amount assigned to an entity.
+●      User assignment — connecting a user to an entity so they submit proposals under it.
+3.  Scope at a glance
+Two epics are in scope. Full stories follow in section 4.
+ 
+Epic
+	Feature
+	Primary actor
+	E1
+	Manage entities and their allocations in Settings
+	Admin
+	E2
+	Assign users to entities so they can submit (Already done, just to make sure this function works when new entities are added.)
+	Admin
+	4.  Epics & stories
+  E1  Manage entities and allocations in Settings 
+In the allocations section of Settings, an admin can add each type of entity and create allocations for them.
+E1-S1  Add entities of each type
+As an admin,
+I want to add departments, divisions, institutions, and global projects in Settings,
+so that the portal reflects the organizational units that carry budget and receive proposals.
+Acceptance criteria
+●      From the allocations section of Settings, an admin can create a new entity of any type: department, division, institution, or global project.
+●      Each entity captures at least a name and its type; the admin can edit and deactivate/remove entities.
+●      Newly added entities become available wherever entities are referenced (e.g., proposal submission, budget/allocation views).
+●      Creating/editing entities is permission-restricted to authorized admins and enforced server-side.
+E1-S2  Insert new allocations for an entity
+As an admin,
+I want to insert new allocations for an entity as needed,
+so that each entity has the budget it is entitled to.
+Acceptance criteria
+●      An admin can add an allocation (amount) to any entity, and add further allocations as needed.
+●      The entity’s available budget reflects its allocation(s).
+●      Allocation changes are recorded consistent with the existing allocation history/audit trail.
+ 
+End of request — OneVoice27 Proposal Portal, Settings: manage entities, allocations & user assignment.
+
+
+HOLD  - OneVoice27 Proposal Portal
+Development Request — Weekly GC Financials Workbook Automation (GC Treasury)
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Depends on:  A blank GC Financials Workbook template (to be provided by GC Treasury)
+Version:  1.1 — Draft for estimation (adds on-demand button, fixed schedule, ad-hoc recipients)
+ 
+1.  Background & purpose
+This is an administrative feature for GC Treasury. The budget accounts and project codes for approved OneVoice27 projects need to be kept current in the GC Financials Workbook. Today this is a manual step; GC Treasury wants it automated.
+The request has two parts: (1) once a week the system should automatically produce an updated GC Financials Budget Summary Sheet containing all approved projects from GC departments and entities — with their budget accounts, project codes, and related financial data — and email it to the standing recipients; and (2) an authorized admin should be able to generate and send the same report on demand at any time via a button, outside the scheduled run, and add extra email recipients for that on-demand send.
+A blank template of the Sheet defines the exact columns, sheets, and layout the output must follow. The stories below are written to be estimated independently; the detailed field mapping is finalized once the template is in hand.
+1.1  Key parameters
+●      Scheduled cadence: every Friday at 4:00 PM Washington, DC time (US Eastern), adjusting automatically for daylight saving.
+●      On-demand generation: an admin can generate and send the report at any time via a button, independent of the weekly schedule.
+●      Contents: all approved projects from GC departments and entities, with budget accounts and project codes.
+●      Output format: the provided GC Financials Workbook template (spreadsheet), populated.
+●      Standing recipients: Gina (ginaj@gc.adventist.org) and Gideon (muteroG@gc.adventist.org).
+●      On-demand recipients: the standing recipients plus any additional email addresses entered at send time.
+2.  Scope at a glance
+Six epics are in scope. Full stories follow in section 4.
+ 
+Epic
+	Feature
+	Primary actor
+	E1
+	Populate the GC Financials Workbook from approved projects
+	System
+	E2
+	Weekly scheduled generation
+	System
+	E3
+	Email the workbook to Gina and Gideon
+	System
+	E4
+	Run log, audit trail & failure handling
+	GC Treasury / Admin
+	E5
+	On-demand “Generate now” button with ad-hoc recipients
+	GC Treasury admin
+	E6
+	Admin controls: standing recipients & schedule
+	GC Treasury admin
+	3.  Cross-cutting requirements
+●      The output must exactly match the structure of the provided GC Financials Workbook template (sheets, columns, order, formats).
+●      Only approved projects from GC departments and entities are included; scope rules are enforced consistently.
+●      Financial figures must be accurate to the source-of-truth in the portal (approved/locked budget and project code).
+●      Recipients and schedule must be configurable by an authorized admin without a code deploy.
+●      Every run and every send is logged; failures are surfaced, never silent.
+4.  Epics & stories
+  E1  Populate the GC Financials Workbook 
+The system fills the provided excel workbook template with the current set of approved GC projects and their financial data.
+E1-S1  Map portal data into the workbook template
+As a system,
+I want to populate the provided GC Financials Workbook template with approved-project data,
+so that GC Treasury receives the data in the exact format they work with.
+Acceptance criteria
+●      The output uses the provided blank template as its basis — same sheets, columns, headings, and formatting.
+●      Each approved project maps to the correct rows/columns, including budget account(s) and project code.
+●      Amounts and codes come from the approved/locked proposal record (the financial source of truth).
+●      The mapping between portal fields and template columns is documented and confirmed against the real template.
+●      The exact column set and per-field mapping is defined by the template — to be finalized once GC Treasury provides it. It needs to be across strategic focus and then by department and entities. See template. 
+
+
+E1-S2  Select the correct set of approved GC projects
+As a system,
+I want to include exactly the approved projects from GC departments and entities,
+so that the budget summary sheet reflects the right, complete population each week.
+Acceptance criteria
+●      Only projects that are approved are included; drafts and in-review proposals are excluded.
+●      Only projects belonging to GC departments and entities are included (per the agreed scope rule).
+●      Newly approved projects appear in the next weekly workbook automatically.
+
+
+  E2  Weekly scheduled generation 
+Generation runs automatically on a weekly schedule with no manual trigger required.
+E2-S1  Generate and send the workbook every Friday at 4 PM DC time
+As a GC Treasury stakeholder,
+I want the budget summary sheet generated and emailed automatically every Friday at 4:00 PM Washington, DC time,
+so that the financial data stays current without anyone remembering to run it.
+Acceptance criteria
+●      A scheduled job produces and sends the populated budget summary sheet  every Friday at 4:00 PM US Eastern (Washington, DC) time.
+●      The schedule adjusts automatically for daylight saving so it always fires at 4:00 PM local DC time (EST/EDT).
+●      The run executes reliably without manual intervention and uses the current approved-project data at run time.
+●      The scheduled run goes to the standing recipients (Gina and Kirian); on-demand runs are covered in Epic E5.
+  E3  Email the workbook to Gina and Gideon
+Each weekly workbook is delivered by email to the designated GC Treasury recipients.
+E3-S1  Send the populated workbook by email
+As a system,
+I want to email the populated workbook to Gina and Kirian,
+so that GC Treasury receives the weekly update directly.
+Acceptance criteria
+●      The populated GC Financials Workbook is attached to an email sent to the standing recipients, Gina (ginaj@gc.adventist.org) and Gideon (muteroG@gc.adventist.org).
+●      The email has a clear subject and body noting the reporting period/date and what it contains.
+●      Standing recipient addresses are read from configurable settings (see Epic E6).
+●      A copy of each sent workbook is stored/retained for the record (Epic E4).
+E3-S2  Handle send failures
+As a GC Treasury admin,
+I want failed sends to be detected and surfaced,
+so that a weekly update is never silently missed.
+Acceptance criteria
+●      A send failure (bounce, provider error, bad address) is logged and flagged to an admin.
+●      The system can retry or resend the already-generated workbook without regenerating it.
+●      If no approved GC projects exist in a given week, the behavior is defined (send an empty/template workbook with a note, or skip — confirm).
+  E4  Run log, audit trail & failure handling 
+Each weekly run is recorded so GC Treasury and admins can confirm it happened and what was sent.
+E4-S1  Record each run and its output
+As a GC Treasury admin,
+I want a record of each weekly run,
+so that I can confirm the update ran and see exactly what was sent.
+Acceptance criteria
+●      Each run records: run date/time, number of projects included, recipients, and success/failure status.
+●      The generated workbook is retained and retrievable for each run.
+●      Errors during generation are logged with enough detail to diagnose them.
+  E5  On-demand generation with ad-hoc recipients 
+Beyond the weekly schedule, an authorized admin can generate and send the report at any time from a button, and add extra recipients for that one send.
+E5-S1  Generate the report on demand from a button
+As a GC Treasury admin,
+I want a button to generate and send the workbook on demand,
+so that I can produce an up-to-date report at any time without waiting for the Friday run.
+Acceptance criteria
+●      A clearly labeled button (e.g., “Generate report now”) is available to authorized GC Treasury admins.
+●      Pressing it produces the populated workbook using the current approved-project data at that moment.
+●      The on-demand run is independent of the weekly schedule and does not change or skip the next scheduled Friday run.
+●      The admin gets clear feedback on progress and success/failure of the on-demand run.
+●      Each on-demand run is logged the same way as a scheduled run (Epic E4), marked as manually triggered and by whom.
+E5-S2  Add additional email recipients for an on-demand send
+As a GC Treasury admin,
+I want to add extra email addresses when sending on demand,
+so that I can share a specific report with people beyond the standing recipients.
+Acceptance criteria
+●      When triggering an on-demand send, the admin can enter one or more additional email addresses.
+●      The on-demand report is sent to the standing recipients (Gina and Kirian) plus any additional addresses entered.
+●      Entered email addresses are validated before sending.
+●      Additional recipients apply only to that on-demand send; they are not saved as standing recipients.
+●      The recipients used for each on-demand send are captured in the run log (Epic E4).
+●      The admin can also deselect a standing recipient for a given on-demand send.  E6  Admin controls: standing recipients & schedule 
+An authorized GC Treasury admin can maintain the standing configuration behind the automation.
+E6-S1  Configure standing recipients and schedule
+As a GC Treasury admin,
+I want to manage the standing recipient list and the weekly schedule,
+so that the automation can adapt without a code change.
+Acceptance criteria
+●      An admin can view and edit the standing recipient list (default: Gina and Gideon).
+●      An admin can view and, if permitted, adjust the weekly schedule (default: Fridays at 4:00 PM DC time).
+●      Changes are permission-restricted to authorized GC Treasury admins and are logged.
+5.  Assumptions & open questions
+●      The blank GC Financials excel Workbook template will be provided by GC Treasury and defines the exact sheets, columns, and formats; final field mapping is confirmed against it.
+●      Row granularity: one row per project, per budget account, or per project code.
+●      Snapshot vs. incremental: full list of all approved GC projects each week, or only new/changed since last run.
+●      Exact scope rule for “GC departments and entities.”
+●      Whether standing recipients can be deselected for a given on-demand send, or are always included.
+●      Empty-week behavior (send template with a note, or skip).
+●      Sending mechanism / from-address, and where generated workbooks are retained.
+ 
+End of request — OneVoice27 Proposal Portal, weekly GC Financials Workbook automation.
+
+
+OneVoice27 Proposal Portal
+Development Request — Initiative Tags & Reserve Fund Allocations
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  September 22, 2026
+Applies to:  Reserve team users, budgets, and proposal submission
+Related:  Reserve department move; Move a proposal between departments
+Version:  1.0 — Draft for estimation
+ 
+1.  Background & purpose
+The Reserve fund is divided into named initiatives. Each initiative should behave like a tag: it has its own allocation (a total amount) and can be connected to one or more users on the Reserve team. A user’s visibility into Reserve budget, and the initiative their submitted projects are assigned to, both flow from the tag(s) they are connected to.
+The rules are: a Reserve-team user who is not tagged to any initiative sees nothing and their balances show as zero; a user tagged to a specific initiative sees only that initiative’s total as their balance; and projects that user submits are automatically assigned to the initiative they are tagged to.
+Global admins should be able to see all and make adjustments to all.
+2.  Reserve fund allocations (reference)
+The current initiatives, their allocations, and managers (from the provided Reserve Fund Allocations view) are shown below. These are the initiative tags to be modeled; amounts and managers are illustrative and maintained by an admin.
+ 
+Initiative (tag)
+	Allocation
+	Manager
+	GC Prayer Initiative
+	$35,500
+	Crystal Ward
+	French Media Advisory
+	$20,000
+	Jethro Camille
+	GC Presidential Social Media
+	$25,000
+	Odailson Fonseca
+	GC Secretariat Social Media
+	$25,000
+	—
+	GC Treasury Social Media
+	$25,000
+	Richard Stephenson
+	Unallocated
+	$29,500
+	—
+	Total
+	$160,000
+	 
+	3.  Definitions
+●      Initiative tag — a named Reserve initiative with its own allocation (total amount); can be connected to users.
+●      Tagged user — a Reserve-team user connected to one (or more) initiative tags.
+●      Allocation — the total amount assigned to an initiative tag; the tagged user’s balance is this amount.
+  E1  Initiative tags for Reserve fund allocations 
+Model each Reserve initiative as a tag with an allocation, connect tags to users, and drive each Reserve user’s budget visibility and proposal assignment from their tag.
+E1-S1  Create and manage initiative tags with allocations
+As a Reserve/global admin,
+I want to define initiative tags, each with an allocation amount and a manager,
+so that the Reserve fund is broken into named initiatives with their own totals.
+Acceptance criteria
+●      An admin can create, edit, and remove initiative tags, each with a name, allocation amount, and (optionally) a manager.
+●      The set of tags and their allocations matches the Reserve Fund Allocations view (e.g., GC Prayer Initiative, French Media Advisory, GC Presidential Social Media, GC Secretariat Social Media, GC Treasury Social Media, plus Unallocated).
+●      The sum of allocations plus Unallocated reconciles to the Reserve total.
+Open question: Confirm whether an initiative tag can have more than one user/manager, and whether “Unallocated” is a special tag or simply the remaining balance.
+E1-S2  Connect users to initiative tags
+As a Reserve/global admin,
+I want to connect a Reserve-team user to one or more initiative tags,
+so that the user is associated with the initiative(s) they manage.
+Acceptance criteria
+●      An admin can tag a Reserve-team user to a specific initiative (and untag them).
+●      A user can be connected to an initiative tag, and the connection is visible/manageable by the admin.
+●      Changes to a user’s tags take effect on their visibility and submissions immediately.
+E1-S3  Show only the tagged initiative’s balance (zero if untagged)
+As a Reserve-team user,
+I want to see only the balance of the initiative I’m tagged to,
+so that I only work with the funds that belong to my initiative.
+Acceptance criteria
+●      A Reserve-team user who is NOT tagged to any initiative sees nothing, and their balances display as zero.
+●      A user tagged to a specific initiative sees only that initiative’s total as their balance.
+●      A user does not see the totals or details of initiatives they are not tagged to.
+●      The displayed balance reflects the initiative’s current available amount (its allocation, less anything already committed against it).
+Open question: For a user tagged to more than one initiative (if allowed), confirm whether they see each initiative’s balance separately or a combined total.
+E1-S4  Assign submitted projects to the user’s initiative tag
+As a Reserve-team user,
+I want the projects I submit to be assigned to the initiative I’m tagged to,
+so that my projects draw from and are tracked against the right initiative.
+Acceptance criteria
+●      A project submitted by a tagged user is automatically assigned to that user’s initiative tag.
+●      The project’s cost is associated with that initiative’s allocation.
+●      If a user is tagged to more than one initiative, the submission captures which initiative the project belongs to (per the multi-tag decision above).
+●      A user who is not tagged to any initiative cannot submit a Reserve project against an initiative (behavior confirmed with product — e.g., blocked or requires a tag first).
+Open question: Confirm how the initiative assignment interacts with the project code / account code, and whether spend against an initiative reduces the shown balance in real time.
+ 
+End of request — OneVoice27 Proposal Portal, initiative tags & Reserve fund allocations.
+
+
+Realignment drafts and archive dev request · MD
+OneVoice27 Proposal Portal — Proposal Exit Paths: Send Back to Drafts, Archive, Duplicate from Archive: Dev Request
+Word version ("Feature Request for OV27 Platform") delivered to Philip. v1.0 2026-10-19; v1.1 2026-10-19 resolves all open questions. Urgent for deployment. Related: Vote Reset on Realignment, Reserve Department Move, Initiative Tags, GC Financials Workbook.
+Decisions (v1.1)
+1. Anyone on the team that owns the proposal can send back or archive.
+2. Archive is permanent — no unarchive/restore; Duplicate is the only way forward.
+3. Actions available at any stage except Approved.
+4. Duplicates count against allocation per existing draft framework.
+5. Archive reason optional.
+6. Multiple duplicates allowed; each duplicate after the first requires acknowledgment checkbox + required reason.
+7. Duplicate starts as Draft (never submitted); every field editable.
+Budget rule
+* Send back to Drafts → Draft; amount STAYS counted against the area's allocation.
+* Archive → Archived (permanent); amount REMOVED from area's total applied for; balance restored (atomic); excluded from all totals/rollups/dashboards/GC Financials Workbook; Reserve initiative amounts release to their tag.
+* Duplicate → new Draft; counts per existing draft framework.
+Epic E1 — Send back to Drafts (any stage except Approved)
+* E1-S1 Action (team members, server-side; hidden on Approved and Draft); confirmation; content/history kept.
+* E1-S2 Amount stays counted.
+* E1-S3 Edit + resubmit via normal flow; votes reset; project code unchanged.
+* E1-S4 Audit (prior status → Draft).
+Epic E2 — Archive (any stage except Approved, incl. Draft)
+* E2-S1 Action (team members); confirmation states permanent; optional reason.
+* E2-S2 Archiving is permanent — no restore via UI or API.
+* E2-S3 Release amount from totals (atomic).
+* E2-S4 Read-only; out of reviewer queues/dashboard/counts; exports marked Archived.
+* E2-S5 Audit incl. amount released and area.
+Epic E3 — Archived section + Duplicate
+* E3-S1 Archived list (title, code, area, released amount, date, by, reason, duplicate count); search/filter; same visibility.
+* E3-S2 Duplicate → new Draft; fields + attachments copied; no votes/comments/history; new number/code; cross-links.
+* E3-S3 Everything editable in the duplicate draft; normal submission flow.
+* E3-S4 Additional duplicates require acknowledgment (with links to existing duplicates) + required reason; no fixed limit.
+* E3-S5 Budget per existing draft framework; original stays archived/released.
+* E3-S6 Audit in both histories incl. acknowledgment/reason.
+
+
+OneVoice27 Proposal Portal — Accountable Person Not Showing on Six Proposals: Bug Fix Request
+Word version ("Bug Fix Request for OV27 Platform") delivered to Philip on 2026-10-19. Related: Strategic Focus Edit, Missing Edit Fields.
+Defect
+Accountable person (Strategic Focus block) not showing on the list for:
+
+
+Proposal #
+	Section
+	Division / Department
+	Proposal Name
+	Proposal Link
+	324
+	Review
+	WAD
+	Media Content Creators Training
+	https://ov27.cloud/admin/proposal/324
+	247
+	Review
+	MENAUM
+	Nowruz Bold Initiative - Persians
+	https://ov27.cloud/admin/proposal/247
+	248
+	Approved
+	NSD
+	OneVoice27 Digital-to-Disciple Platform (Northern Asia-Pacific Division)
+	https://ov27.cloud/admin/proposal/248
+	255
+	Approved
+	MENAUM
+	"All Things New" Creator Contest - Middle East University (MEU)
+	https://ov27.cloud/admin/proposal/255
+	181
+	Approved
+	IF
+	Israel Field-wide Proclamation and Harvesting Initiative
+	https://ov27.cloud/admin/proposal/181
+	179
+	Approved
+	IF
+	Israel Media Evangelism and Creators Conference
+	https://ov27.cloud/admin/proposal/179
+	
+
+Epic E1 — Find the root cause
+* E1-S1 Investigate: stored vs displayed value; compare with working proposals from same entities. Likely causes: value blank/lost (e.g., realignment edit gap); value doesn't match valid option/user (renamed/deleted/deactivated, free text vs ID); list query/join drops it for certain entities (MENAUM, IF are attached fields); legacy schema/format; display/permission rule by section/status.
+* E1-S2 Short root-cause note (data, display, or both).
+Epic E2 — Fix the six proposals
+* E2-S1 Accountable shows on list, proposal view, edit mode, exports; if unrecoverable, flag to Secretary rather than guess.
+* E2-S2 Safe correction: only Accountable field changes; approved proposals stay approved/locked (admin data fix); change logged as bug fix.
+Epic E3 — Prevent recurrence
+* E3-S1 Fix root cause; scan all proposals for missing/mismatched Accountable; report and correct.
+* E3-S2 Regression across submit, edit, realignment, resubmit, approval, department/Reserve moves; all entity types; list/view/edit/export parity.
+
+
+
+
+OneVoice27 Proposal Portal
+Development Request — Move a Proposal Between Departments
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  September 22, 2026
+Applies to:  Global admin and Technical secretary — budget management across departments
+Related:  Reserve department move (same budget-transaction pattern)
+Version:  1.0 — Draft for estimation
+ 
+1.  Background & purpose
+Each department has its own budget total, and proposals draw down against the budget of the department they belong to. A global admin or technical secretary needs to be able to move a proposal from one department to another — regardless of the proposal’s status, including approved proposals — and have the budgets on both sides re-balanced automatically.
+When a proposal is moved, two budget effects must occur together: the destination department’s available funds are reduced by the proposal’s amount (it now carries the cost), and the originating department’s available funds are increased by the proposal’s amount (it is released from the cost). In effect, the cost follows the proposal to its new department.
+2.  Definitions
+●      Originating department — the department the proposal currently belongs to and whose budget it currently draws from.
+●      Destination department — the department the proposal is being moved to, which will carry its cost after the move.
+●      Authorized mover — a user with the Global admin or Technical secretary role, permitted to perform this move.
+  E1  Move a proposal between departments 
+A global admin or technical secretary can move a proposal of any status from one department to another, with the destination budget reduced and the originating budget increased accordingly.
+E1-S1  Move a proposal of any status and re-balance budgets
+As a global admin or technical secretary,
+I want to move a proposal from one department to another regardless of its status,
+so that the proposal sits in the correct department and its cost moves with it.
+Acceptance criteria
+●      An authorized mover (Global admin or Technical secretary) can move a proposal from its current department to any other department.
+●      A proposal can be moved regardless of status — including approved proposals, and proposals in draft, review, realignment, or any other state.
+●      On the move, the destination department’s available funds are reduced (decreased) by the proposal’s amount.
+●      On the move, the originating department’s available funds are increased by the proposal’s amount.
+●      Both budget effects happen together as a single transaction; neither occurs without the other.
+●      The proposal is thereafter associated with the destination department.
+●      Only the Global admin and Technical secretary roles can perform this move; the capability is enforced server-side.
+Open question: Confirm the exact amount used for the re-balance — the proposal’s approved/allocated amount, or its remaining/uncharged balance if spending has already begun.
+E1-S2  Preserve the proposal’s status on move
+As an authorized mover,
+I want the proposal to keep its status when it moves to the destination department,
+so that the move relocates the proposal without disrupting its place in the workflow.
+Acceptance criteria
+●      The proposal’s status is unchanged by the move — an approved proposal stays approved; an in-review proposal stays in review; and so on.
+●      The move changes only the owning department and re-balances the budgets (per E1-S1); it does not reset or advance the workflow status.
+●      The project code (which reflects the department/account) should be updated to the destination department’s account code on move, consistent with the Reserve department behavior.
+E1-S3  Confirm the move and record it for audit
+As an authorized mover,
+I want to confirm the move and have it recorded,
+so that the budget change is intentional and fully traceable.
+Acceptance criteria
+●      Before the move completes, the mover sees a confirmation showing the proposal, the originating department, the destination department, and the amount that will move.
+●      After the move, the originating department, the destination department, and the proposal all reflect the updated balances immediately.
+●      The move is recorded in the audit trail: the proposal, from-department → to-department, the amount, the user who performed it (and their role), and the timestamp.
+●      If the destination department does not have sufficient available funds, the behavior is defined (block with a clear message, or allow with a warning — confirm).
+●      The change flows through to financial reporting (e.g., the GC Financials Workbook) so downstream figures stay consistent.
+ 
+End of request — OneVoice27 Proposal Portal, move a proposal between departments.
+
+
+OneVoice27 Proposal Portal
+Development Request — Batched Notification Digests (4× Daily)
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  September 22, 2026
+Applies to:  Portal notifications (votes, comments, and other activity)
+Version:  1.0 — Draft for estimation
+ 
+1.  Background & purpose
+Today the portal sends a notification for each individual event — every vote cast, every comment left, and other activity — which produces a high volume of messages. To reduce that volume, notifications should instead be batched and delivered as a digest four times a day.
+The digest times are fixed to Washington, DC time (US Eastern): 8:00 AM, 10:00 AM, 1:00 PM, and 5:00 PM. Each digest gathers the activity since the previous digest and sends it as a single, consolidated notification per user, rather than one message per event.
+  E1  Batched notification digests 
+Replace per-event notifications with a consolidated digest delivered four times a day at fixed Washington, DC times.
+E1-S1  Deliver notifications as a digest four times a day
+As a portal user who receives notifications,
+I want notifications batched into a digest sent four times a day instead of one message per event,
+so that I get a manageable summary of activity rather than a flood of individual notifications.
+Acceptance criteria
+●      Individual events (votes, comments, and other notifiable activity) no longer trigger an immediate one-off notification; they are accumulated for the next digest.
+●      Digests are sent four times a day at 8:00 AM, 10:00 AM, 1:00 PM, and 5:00 PM Washington, DC time (US Eastern).
+●      Digest times follow Washington, DC local time and adjust automatically for daylight saving (EST/EDT).
+●      Each digest contains all of a user’s relevant activity since the previous digest, consolidated into a single notification.
+●      The digest groups/summarizes the events (e.g., votes and comments) clearly so the user can see what happened and where.
+●      A user with no new activity in a given window does not receive an empty digest.
+●      Each event appears once — it is included in exactly one digest and not repeated in later ones.
+●      Digest delivery runs automatically on schedule with no manual trigger; a missed/failed run is logged and can be retried without duplicating a user’s items.
+●      These apply only to email notifications. In-app notifications need to be sent immediately.
+ 
+End of request — OneVoice27 Proposal Portal, batched notification digests (4× daily).
+
+
+OneVoice27 Proposal Portal
+Development Request — Editable & Tracked Division Budget Allocations
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  September 22, 2026
+Applies to:  Global admin — division / department budget allocation
+Related:  Reserve department move; Move a proposal between departments; Initiative tags
+Version:  1.0 — Draft for estimation
+ 
+1.  Background & purpose
+Divisions are beginning to give up part of their overall budget so it can be reallocated elsewhere. For example, SPD (South Pacific Division) — and potentially other divisions — may release budget that is then reassigned to other departments/divisions.
+The global admin needs to be able to edit the approved budget allocation for a division, lock it in, and have every change tracked. When an amount is removed from one division and reallocated to another, both sides of the move must be recorded with a note explaining where the money is moving to and from, so there is a complete, auditable history of allocation changes.
+2.  Definitions
+●      Division / department allocation — the approved budget amount assigned to a division or department.
+●      Reallocation — moving an amount out of one division’s allocation and into another’s.
+●      Locked allocation — an approved allocation the global admin has finalized so it cannot be edited until deliberately unlocked/adjusted.
+●      Allocation history — the tracked record of every allocation edit and reallocation, including amounts, from/to, note, who, and when.
+3.  Scope at a glance
+Three epics are in scope. Full stories follow in section 5.
+ 
+Epic
+	Feature
+	Primary actor
+	E1
+	Edit and lock a division’s approved budget allocation
+	Global admin
+	E2
+	Reallocate an amount between divisions with a required note
+	Global admin
+	E3
+	Allocation history / audit trail
+	Global admin / Treasury
+	4.  Cross-cutting requirements
+●      All allocation edits and reallocations are permission-restricted to the global admin and enforced server-side.
+●      Budget math must stay balanced: an amount removed from one division must be accounted for (reallocated or explicitly held), never lost.
+●      Changes flow through to dependent figures (department available funds, financial reporting / GC Financials Workbook).
+●      Every change is timestamped and attributed to the user who made it.
+5.  Epics & stories
+  E1  Edit and lock a division’s approved budget 
+The global admin can adjust a division’s approved allocation and lock it once finalized.
+E1-S1  Edit a division’s approved budget allocation
+As a global admin,
+I want to edit the approved budget allocation for a division,
+so that I can reflect a division giving up or receiving budget.
+Acceptance criteria
+●      The global admin can change a division’s approved allocation amount (increase or decrease).
+●      The edit updates the division’s allocation and its available funds accordingly.
+●      Only the global admin can edit an allocation; enforced server-side.
+●      Every edit is written to the allocation history (Epic E3).
+E1-S2  Lock an approved allocation
+As a global admin,
+I want to lock a division’s approved allocation once it is finalized,
+so that the approved amount is protected from further change until deliberately adjusted.
+Acceptance criteria
+●      The global admin can lock a division’s approved allocation.
+●      While locked, the allocation cannot be edited by anyone until it is unlocked/adjusted by the global admin.
+●      Locking and unlocking are recorded in the allocation history (who and when).
+●      A reallocation (Epic E2) cannot act on a locked allocation directly, it must be unlocked first.
+  E2  Reallocate an amount between divisions 
+When budget is removed from one division and given to another, the move is recorded as a single reallocation with a required note.
+E2-S1  Move an amount from one division to another
+As a global admin,
+I want to remove an amount from one division and reallocate it to another,
+so that released budget (e.g., from SPD) is reassigned where it is needed.
+Acceptance criteria
+●      The global admin can specify a source division, a destination, and an amount to reallocate.
+●      The amount is deducted from the source division’s allocation and added to the destination’s allocation.
+●      Both sides happen together as a single transaction; the total across divisions is conserved.
+●      A division’s allocation cannot be reduced below what it has already committed/spent (behavior confirmed with product).
+●      The destination is always another division/department, (not yet assigned) is NOT allowed.
+E2-S2  Require a note for every reallocation
+As a global admin,
+I want to record a note for where the money is moving to and from,
+so that the reason and direction of each reallocation are clear in the history.
+Acceptance criteria
+●      Each reallocation requires a note describing the movement (from where, to where, and why).
+●      The from-division, to-division, amount, and note are captured together on the reallocation record.
+●      The reallocation cannot be completed without the note.
+  E3  Allocation history / audit trail 
+Every allocation edit, lock, and reallocation is tracked so the full history of division budgets is auditable.
+E3-S1  Track a full history of allocation changes
+As a global admin or Treasury reviewer,
+I want a tracked history of every allocation change,
+so that I can see how each division’s budget reached its current amount.
+Acceptance criteria
+●      Every allocation edit, lock/unlock, and reallocation is recorded with: the amount, previous → new value (for edits), from-division → to-division (for reallocations), the note, the user, and the timestamp.
+●      The history is viewable per division and across the reallocation of amounts between divisions.
+●      History entries are immutable — they cannot be edited or deleted.
+●      The history reconciles: the sum of a division’s recorded changes equals its current allocation.
+E3-S2  View reallocations from both sides
+As a global admin or Treasury reviewer,
+I want each reallocation to be visible from both the giving and receiving division,
+so that the movement of money is clear from either end.
+Acceptance criteria
+●      A reallocation appears in the source division’s history as an outbound movement and in the destination’s as an inbound movement.
+●      Both views show the amount, the counterpart division, the note, the user, and the timestamp.
+●      The history is exportable / available to financial reporting.
+ 
+End of request — OneVoice27 Proposal Portal, editable & tracked division budget allocations.
+
+
+OneVoice27 Proposal Portal
+Development Request — Sidebar Links: Strategic Framework & Onboarding Videos
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  September 22, 2026
+Applies to:  The portal sidebar / main navigation
+Version:  1.0 — Draft for estimation
+ 
+1.  Background & purpose
+Two reference resources should be reachable at any time from the portal sidebar: the Strategic Framework and the Onboarding Videos. Both are currently hard to get back to — the strategic framework has no home in the app, and the onboarding videos are only seen once during initial onboarding.
+This request adds two persistent links to the sidebar so users can open the Strategic Framework page and revisit the onboarding videos whenever they need them, including after onboarding is already complete.
+2.  Definitions
+●      Strategic Framework — a reference page describing the OneVoice27 strategic framework; the content will be provided as an HTML file.
+●      Onboarding Videos — the video content shown during first-time onboarding, to be made available on demand as an ongoing reference.
+  E1  Add Strategic Framework & Onboarding Videos to the sidebar 
+Add two persistent sidebar links that open the Strategic Framework page and the onboarding videos, available to users at any time.
+E1-S1  Add a Strategic Framework link to the sidebar
+As a portal user,
+I want a Strategic Framework link in the sidebar,
+so that I can open the strategic framework reference whenever I need it.
+Acceptance criteria
+●      A clearly labeled “Strategic Framework” link appears in the sidebar navigation.
+●      Selecting it opens the Strategic Framework page, which renders the provided HTML file.
+●      The page displays correctly within the portal and is responsive on the mobile layout.
+●      The link follows the existing sidebar styling and placement conventions.
+Note: The HTML file for this page will be provided; the story covers wiring it into a sidebar link and page, not authoring the content.
+Open question: Confirm whether the HTML should be embedded as a hosted page/route inside the portal or opened as a standalone page, and whether the content will be updated over time (i.e., loaded from a maintainable location rather than hard-coded).
+E1-S2  Add an Onboarding Videos link to the sidebar
+As a portal user,
+I want an Onboarding Videos link in the sidebar,
+so that I can revisit the onboarding video content at any time.
+Acceptance criteria
+●      A clearly labeled “Onboarding Videos” link appears in the sidebar navigation.
+●      Selecting it opens the onboarding videos page where the videos can be played.
+●      The page follows the existing portal styling and is responsive on the mobile layout.
+E1-S3  Keep onboarding videos accessible after completion
+As a user who has already completed onboarding,
+I want to still open and watch the onboarding videos,
+so that I can go back and reference the content whenever I need a refresher.
+Acceptance criteria
+●      The Onboarding Videos link remains available after a user has completed onboarding — it is not hidden or disabled once onboarding is marked complete.
+●      Completing onboarding does not remove access; users can reopen and replay any of the videos at any time.
+●      Revisiting the videos does not reset, re-trigger, or otherwise alter the user’s onboarding-complete status.
+●     Both links are viewable to all roles
+ 
+End of request — OneVoice27 Proposal Portal, sidebar links for Strategic Framework & Onboarding Videos.
+
+
+OneVoice27 Proposal Portal
+Development Request — Reviewer Dashboard: Status Icons & Quick Filter Views
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Applies to:  The Reviewer role and their dashboard / proposal lists
+Version:  1.0 — Draft for estimation
+ 
+1.  Purpose
+This request improves the reviewer experience in the OneVoice27 proposal portal. Reviewers work several proposals in parallel and need to see, at a glance, which proposals they have already acted on, which are still waiting on them, and which have come back to them after realignment.
+Two capabilities are requested: (1) a per-proposal status icon on the reviewer’s dashboard that shows the reviewer’s own action on each proposal, and (2) fast filter views that let a reviewer switch between their task list, what they have completed, and what is still pending — including items that return to their queue after a proposal has gone for realignment.
+The stories below are grouped into epics and written to be estimated independently. Icons and states should reuse the portal’s existing design system and its current reviewer-completion indicators for consistency.
+1.1  Reviewer states (icon legend)
+Each proposal shows one icon reflecting this reviewer’s own status on it. Suggested states (final icon choices to be confirmed with design):
+ 
+State
+	Meaning
+	Suggested indicator
+	Approved
+	I have approved this proposal
+	Solid green dot / check
+	Info requested
+	I requested more information / changes
+	Amber return or comment icon
+	Pending
+	Awaiting my review — not yet actioned
+	Hollow grey circle
+	Returned
+	Back in my queue after realignment
+	Distinct “returned” icon + pending
+	2.  Scope at a glance
+Four epics are in scope. Full stories follow in section 4.
+ 
+Epic
+	Feature
+	Primary actor
+	E1
+	Per-proposal reviewer status icon on the dashboard
+	Reviewer
+	E2
+	Quick filter views: Task list / Completed / Pending
+	Reviewer
+	E3
+	Realignment returns re-enter the reviewer’s queue
+	Reviewer / System
+	E4
+	At-a-glance counts / badges per view
+	Reviewer
+	3.  Cross-cutting requirements
+●      Every indicator reflects THIS reviewer’s own status, not the proposal’s overall status or another reviewer’s state.
+●      Icons must be accessible: color is never the only signal (pair each with a shape/label and a tooltip/aria-label).
+●      Views and icons update in real time (or on refresh) as the reviewer acts and as proposals move through the workflow.
+●      Reuse the portal’s existing reviewer-completion pattern and design system; keep behavior consistent on the mobile layout.
+4.  Epics & stories
+  E1  Per-proposal reviewer status icon 
+Each proposal in the reviewer’s dashboard/list shows a small icon indicating what this reviewer has done with it.
+E1-S1  Show ‘approved by me’ indicator
+As a reviewer,
+I want a small green dot (or equivalent icon) on proposals I have approved,
+so that I can instantly see which proposals I’ve already signed off.
+Acceptance criteria
+●      Proposals this reviewer has approved show a solid green dot / approved icon.
+●      The icon reflects this reviewer’s own approval, independent of other reviewers or the proposal’s overall status.
+●      Hovering/focusing the icon reveals a label such as “You approved this.”
+E1-S2  Show ‘information requested by me’ indicator
+As a reviewer,
+I want a distinct icon on proposals where I requested more information or changes,
+so that I can tell those apart from ones I approved or haven’t touched.
+Acceptance criteria
+●      Proposals where this reviewer requested more information/changes show a distinct icon (not the approved icon).
+●      The icon is visually different in shape and color from ‘approved’ and ‘pending’.
+●      Hover/focus reveals a label such as “You requested more information.”
+E1-S3  Show ‘pending my review’ indicator
+As a reviewer,
+I want an icon showing which proposals I still have to review,
+so that I know what remains outstanding for me.
+Acceptance criteria
+●      Proposals awaiting this reviewer’s action show a clear ‘pending’ icon (e.g., a hollow circle).
+●      Once the reviewer approves or requests information, the icon updates to the matching completed state immediately.
+●      Hover/focus reveals a label such as “Awaiting your review.”
+  E2  Quick filter views 
+The reviewer can switch quickly between focused views of their work with a single click/tap.
+E2-S1  My task list view
+As a reviewer,
+I want a “Task list” view of everything requiring my action,
+so that I have one place that shows all my outstanding work.
+Acceptance criteria
+●      The Task list shows all proposals that need this reviewer’s action, including pending reviews and items returned after realignment (Epic E3).
+●      Items already completed by this reviewer are excluded from the task list.
+●      Switching to this view is a single click/tap and loads quickly.
+E2-S2  Completed view
+As a reviewer,
+I want a “Completed” view of proposals I have already actioned,
+so that I can review what I’ve approved or sent back.
+Acceptance criteria
+●      The Completed view lists proposals this reviewer has approved or requested information on.
+●      Each item retains its status icon (approved vs info requested) so the two are distinguishable.
+●      If a completed item later returns for re-review, it moves back into Pending / Task list (Epic E3).
+E2-S3  Pending view
+As a reviewer,
+I want a “Pending” view of proposals still waiting for my review,
+so that I can focus only on what hasn’t been actioned yet.
+Acceptance criteria
+●      The Pending view lists only proposals awaiting this reviewer’s first action, plus returns awaiting re-review.
+●      Items are ordered helpfully (e.g., oldest-waiting or by due date — confirm sort).
+●      Filters combine with the existing proposal filters (status, category, etc.) without conflict.
+Open question: Confirm the exact view set and labels — “Task list / Completed / Pending” as above, or a different split — and the default view on landing.
+  E3  Realignment returns re-enter the queue 
+When a proposal goes through realignment and comes back, it must reappear in the reviewer’s queue as needing attention, clearly marked as a return.
+E3-S1  Returned proposals reappear as pending
+As a reviewer,
+I want proposals that come back to me after realignment to reappear in my task list / pending view,
+so that I don’t miss items that need a second look.
+Acceptance criteria
+●      When a proposal returns to this reviewer after realignment, it moves back into the Task list and Pending views.
+●      Its status icon reverts to a state indicating action is needed again (pending / returned).
+●      The reviewer’s prior decision history on the proposal is retained and viewable.
+E3-S2  Distinguish returns from first-time reviews
+As a reviewer,
+I want returned items visually distinguished from brand-new ones,
+so that I can tell what I’m seeing again versus reviewing for the first time.
+Acceptance criteria
+●      Returned-after-realignment items carry a distinct marker (e.g., a “Returned” badge or icon) in the list.
+●      Hover/focus explains the marker (e.g., “Returned after realignment — needs re-review”).
+●      The marker clears once the reviewer completes the re-review.
+Open question: Confirm what specifically triggers a ‘return’ to the reviewer (the Realignment stage completing, a resubmission, an approver action) and whether all original reviewers or only some are re-queued.
+  E4  At-a-glance counts / badges 
+Small counts help the reviewer gauge workload without opening each view.
+E4-S1  Show counts per view
+As a reviewer,
+I want a count on each view (Task list / Completed / Pending),
+so that I can see how much is outstanding at a glance.
+Acceptance criteria
+●      Each view/tab shows a numeric badge of the items it contains for this reviewer.
+●      Counts update as the reviewer acts and as items return via realignment.
+●      A zero state is shown clearly (e.g., no badge or a “0 / all caught up” message).
+ 
+End of request — OneVoice27 Proposal Portal, reviewer dashboard status icons & filter views.
+
+
+OneVoice27 Proposal Portal
+Development Request — Restore Missing Fields in Proposal Edit Mode
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Type:  Defect fix — read/edit field parity
+Version:  1.0 — Draft for estimation
+
+
+1.  Background & the defect
+When in realignment mode: Comparing the read (view) layout of a proposal with the edit layout reveals a defect: several fields that appear in the read view are missing from the edit form, so a submitter cannot change them when editing the proposal (for example, after it is opened for edits or sent back for realignment).
+The fields that are present in the read view but missing from edit mode are:
+* Project Deliverables (the physical/intangible deliverables the end user receives).
+* Target Audience (select all that apply) — the audience-segment selections plus the free-text note.
+* Points of Integration (the departments/institutions the project integrates with, and the rationale).
+In the edit form, the layout currently jumps from the “Was a similar project completed…” question straight to the Budget section, skipping these three fields. This is a glitch: the fields exist and display when reading, but are not rendered as editable inputs.
+  E1  Restore missing fields in proposal edit mode  
+Bring the edit form to full parity with the read view so that every field shown when reading a proposal is also present and editable when editing it — closing the gap for Project Deliverables, Target Audience, and Points of Integration.
+E1-S1  Show and edit the three missing fields
+As a submitter editing my proposal,
+I want Project Deliverables, Target Audience, and Points of Integration to appear and be editable in the edit form,
+so that I can update them instead of being unable to change what I can clearly see in the read view.
+Acceptance criteria
+* The edit form displays Project Deliverables, Target Audience (select all that apply), and Points of Integration, in the same position/order they appear in the read view (between the “similar project” question and the Budget section).
+* Each field uses the correct input type, matching how it was originally captured: Project Deliverables as text; Target Audience as the multi-select checkbox list plus its free-text note; Points of Integration as the department/institution field plus its rationale.
+* Each field is pre-populated with its current saved value and edits persist on save/resubmission.
+* Any validation that applies at submission (e.g., required selections) is applied consistently in edit mode.
+* Changes to these fields are captured in the change log (field, from → to, user, timestamp).
+E1-S2  Guarantee full read/edit field parity
+As a product owner,
+I want every field visible in the read view to also be present in the edit form,
+so that no field can be viewed but not edited, now or in the future.
+Acceptance criteria
+* A field-by-field comparison confirms the read view and edit form contain the same set of proposal fields (no field visible in one is missing from the other).
+* The three fields above are verified as the specific gaps closed, and a regression check covers the full proposal form.
+* The fix applies wherever a proposal is edited (initial edit and edits during realignment).
+Note: This is the same class of defect previously reported for the Strategic Focus block; a single parity check across the whole form helps prevent further recurrences.
+
+
+End of request — OneVoice27 Proposal Portal, restore missing fields in edit mode.
+  
+  
+
+
+
+OneVoice27 Proposal Portal
+Development Request — Approval Letter Generation & Delivery
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Depends on:  Secretary approval & lock (see “Progress” tab request, Epic E3)
+Version:  1.0 — Draft for estimation
+ 
+1.  Purpose
+This request builds on the secretary approval feature in the OneVoice27 proposal portal. When the secretary approves a proposal and locks it in, the portal must automatically produce an official approval letter and deliver it, together with a PDF of the approved proposal, to the applicant and to the General Conference Treasury contacts.
+The letter uses a fixed template with merge fields drawn from the proposal (applicant/entity, project title, and approved amount). The exact wording is provided in section 5 and should be treated as authoritative; only the bracketed merge fields vary per proposal.
+The stories below are grouped into epics and written to be estimated independently. Behaviors gated on approval should fire from the same event that locks the project code (see the “Progress” tab request, Epic E3).
+1.1  Trigger & recipients (summary)
+●      Trigger: the secretary approves and locks the proposal (final approval).
+●      Generated documents: (a) the approval letter, and (b) a PDF of the approved proposal.
+●      Recipients: the applicant / entity, plus the GC Treasury contacts ginaj@gc.adventist.org and muteroG@gc.adventist.org.
+2.  Scope at a glance
+Five epics are in scope. Full stories follow in section 4; the letter template is in section 5.
+ 
+Epic
+	Feature
+	Primary actor
+	E1
+	Approval letter template with merge fields
+	System
+	E2
+	Generate letter + proposal PDF on approval
+	System / Secretary
+	E3
+	Email delivery to applicant + GC contacts
+	System
+	E4
+	Delivery record & audit trail
+	Admin / Secretary
+	E5
+	Secretary review / resend controls
+	Secretary
+	3.  Cross-cutting requirements
+●      Letter and email content must match the approved template exactly, with only merge fields substituted.
+●      Merge fields must be resolved from the approved (locked) proposal record, so figures cannot change after the letter is issued.
+●      Recipient addresses (GC contacts) must be configurable by an admin without a code deploy.
+●      Follow the portal’s existing design system for any new UI; documents should carry OneVoice27 branding.
+●      Email sending must be logged and failures surfaced — a silent send failure is not acceptable.
+4.  Epics & stories
+  E1  Approval letter template with merge fields 
+A single, controlled letter template holds the approved wording. Only the bracketed fields vary per proposal.
+E1-S1  Store the approved letter template
+As a system,
+I want a single stored template for the approval letter,
+so that every approved project receives identical, officially approved wording.
+Acceptance criteria
+●      The template contains the exact wording in section 5 of this document.
+●      Merge fields are: [Applicant / Entity], [Project Title], and [Amount].
+●      The template is versioned; changes to wording are controlled (admin-only) and do not affect letters already issued.
+●      The signature block reads “OneVoice27 Project Review Subcommittee.”
+E1-S2  Resolve merge fields from the approved proposal
+As a system,
+I want merge fields populated automatically from the approved proposal,
+so that the letter is accurate without manual data entry.
+Acceptance criteria
+●      [Applicant / Entity] resolves to the submitting applicant/entity on the proposal.
+●      [Project Title] resolves to the proposal title.
+●      [Amount] resolves to the approved/allocated budget, formatted as currency (e.g., US$180,000).
+●      If any required field is missing, letter generation is blocked and the secretary is notified, rather than sending a letter with empty brackets.
+Note: The ov27.cloud monitoring/evaluation reference in the letter body is static text, not a merge field.
+  E2  Generate letter + proposal PDF on approval 
+On final approval, the system produces two artifacts: the approval letter and a PDF of the approved proposal.
+E2-S1  Trigger generation on secretary approval
+As a secretary,
+I want the approval letter and proposal PDF generated automatically when I approve and lock a proposal,
+so that no separate manual step is needed to produce the official paperwork.
+Acceptance criteria
+●      Generation fires from the same approval/lock event that finalizes the proposal (Progress tab, Epic E3).
+●      It runs only once per approval; re-approval or edits do not silently regenerate and resend without intent (see Epic E5).
+●      Generation is idempotent — a retry after a transient failure does not create duplicate letters.
+E2-S2  Render the approval letter as a PDF
+As a system,
+I want the populated letter rendered as a branded PDF,
+so that it can be attached to an email and stored as an official record.
+Acceptance criteria
+●      The letter renders with OneVoice27 branding/letterhead and the exact template wording.
+●      Merge fields appear as resolved values (no visible brackets).
+●      The rendered letter is stored against the proposal record.
+E2-S3  Generate a PDF of the approved proposal
+As a system,
+I want a PDF export of the approved proposal produced at approval,
+so that recipients receive the full, final proposal alongside the letter.
+Acceptance criteria
+●      The proposal PDF reflects the approved, locked content (reuse the existing Export PDF capability where possible).
+●      The PDF is captured as a point-in-time snapshot of the approved proposal, so later edits do not alter the sent copy.
+●      The proposal PDF is stored against the proposal record alongside the letter.
+  E3  Email delivery to applicant + GC contacts 
+The letter and the proposal PDF are emailed to the applicant and the GC Treasury contacts.
+E3-S1  Send the letter and proposal PDF by email
+As a system,
+I want to email the approval letter with the approved-proposal PDF attached,
+so that all parties receive the official approval and full proposal automatically.
+Acceptance criteria
+●      Recipients include the applicant/entity and the GC contacts ginaj@gc.adventist.org and muteroG@gc.adventist.org.
+●      Both the approval letter (PDF) and the approved-proposal PDF are attached (or the letter forms the email body with the proposal PDF attached — confirm; see open question).
+●      The email subject and body are consistent and reference the project title and approval.
+●      The GC recipient addresses are read from admin-configurable settings, not hard-coded. (preferred for future adjustments)
+E3-S2  Handle delivery failures
+As an org administrator,
+I want failed sends to be detected and surfaced,
+so that an approval is never left without its letter reaching the recipients.
+Acceptance criteria
+●      A send failure (bounce, invalid address, provider error) is logged and flagged to the secretary/admin.
+●      The system supports retry without regenerating duplicate documents.
+●      A missing/invalid applicant email does not block delivery to the GC contacts, and vice versa; each recipient’s outcome is tracked.
+  E4  Delivery record & audit trail 
+Issuing an approval letter is an official act and must be traceable, consistent with the portal’s existing audit approach.
+E4-S1  Record that the letter was issued and sent
+As an org administrator,
+I want a record of each approval letter generated and sent,
+so that there is an accountable history of official approvals.
+Acceptance criteria
+●      The record captures: the proposal, the approving secretary, the generation timestamp, the recipient list, and the send outcome per recipient.
+●      The stored letter PDF and proposal PDF are retrievable from the proposal.
+●      Audit entries are immutable and align with the existing change-log pattern.
+E4-S2  Access issued documents from the proposal
+As a secretary or admin,
+I want to open the issued letter and proposal PDF from the proposal,
+so that I can confirm exactly what was sent.
+Acceptance criteria
+●      The issued letter and proposal PDF are downloadable from the proposal detail page.
+●      Each shows its issue date and the recipients it was sent to.
+  E5  Secretary review / resend controls 
+The secretary needs light controls to confirm delivery and, if needed, resend — without altering the locked figures.
+E5-S1  Resend the approval package
+As a secretary,
+I want to resend the approval letter and proposal PDF,
+so that I can recover from a bad address or a recipient who didn’t receive it.
+Acceptance criteria
+●      The secretary can resend the already-issued documents to the original or a corrected recipient list.
+●      Resending reuses the originally issued documents (does not regenerate new figures).
+●      Each resend is logged in the audit trail with who, when, and to whom.
+Open question: Should the secretary be able to preview the letter before the first send, or is send fully automatic on approval?
+5.  Approval letter template (authoritative wording)
+Merge fields are shown in coral. Everything else is fixed wording.
+ 
+Dear [Applicant / Entity],
+
+On behalf of the OneVoice27 Project Review Subcommittee, we are pleased to inform you that [Project Title] has been approved, with an allocated budget of [Amount].
+
+
+As the project moves forward, please follow the General Conference Treasury’s instructions on:
+1.  How to spend funds and submit charges.
+2.  How to provide data for monitoring and a final evaluation at ov27.cloud before the project is closed and marked complete.
+
+
+More information about the monitoring and evaluation process will follow in the coming months.
+We thank you for your partnership and look forward to what God will do through this work.
+
+
+Sincerely,
+OneVoice27 Project Review Subcommittee
+ 
+5.1  Recipients
+●      Applicant / entity (email stored on the proposal — confirm field).
+●      ginaj@gc.adventist.org
+●      muteroG@gc.adventist.org
+A copy of this letter plus a PDF of the approved proposal is sent to each recipient.
+ 
+End of request — OneVoice27 Proposal Portal, approval letter generation & delivery.
+
+
+OneVoice27 Proposal Portal
+Development Request — "Progress" Tab: Project Coding, Lifecycle Tracking & Audit
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Reference:  Proposal detail view — proposal #84, current “Survey” tab
+Version:  1.0 — Draft for estimation
+ 
+1.  Purpose
+The goal is to give each approved project a standardized project code, to track where a project sits in its lifecycle (phase and status), to let a secretary approve and lock the code at final approval, to keep a full audit trail of status changes made by the org team, and to unlock the base survey only after a proposal is approved.
+The stories below are grouped into epics. Each story is written to be picked up independently and estimated on its own. Field names, dropdown values, and the code format are taken directly from the annotated design and should be treated as authoritative unless flagged as an open question.
+1.1  Workflow context
+The proposal moves through the following stages, shown as a stepper at the top of the detail page:
+Submitted  →  Review  →  Realignment  →  Approved  →  Base survey
+“Approved” is the final-approval milestone. Several behaviors in this request are gated on it: the secretary locks the project code at approval, the org team can change status only after approval, and the base survey unlocks at approval.
+1.2  Roles referenced in this request
+●      Secretary — approves and locks the project code at final approval; can edit the code only before approval.
+●      Org team member — any authorized member of the org team who may change a project’s status after final approval.
+●      Existing roles (Submitter, Reviewer, Approver, Admin) remain as they are; this request adds the Secretary permission set and the org-team status-change permission.
+2.  Scope at a glance
+Six epics are in scope. Full stories follow in section 4.
+ 
+Epic
+	Feature
+	Primary actor
+	E1
+	Rename the “Survey” tab to “Progress”
+	All users
+	E2
+	Automated project code (OrgID, Project ID, composite display)
+	System / Submitter
+	E3
+	Secretary approval & lock of the project code
+	Secretary
+	E4
+	Progress tracking: Phase and Status dropdowns
+	Org team
+	E5
+	Audit trail for phase & status changes
+	Org team / Admin
+	E6
+	Base survey availability gated on approval
+	System / Submitter
+[a]	
+3.  Cross-cutting requirements
+●      Permissions must be enforced server-side, not only hidden in the UI.
+●      The composite project code and its parts must be included in the existing exports (Export PDF, Export JSON, Export Budget) once generated.
+●      All new fields should follow the portal’s existing design system (navy / coral accent) and be responsive on the mobile layout.
+●      Auto-assigned identifiers must be unique and must never be silently reused if a proposal is deleted or withdrawn.
+4.  Epics & stories
+  E1  Rename the “Survey” tab to “Progress” 
+The tab that currently reads “Survey” on the proposal detail page holds progress and project-code information, so its label should read “Progress.”
+E1-S1  Rename the tab label
+As a portal user,
+I want the “Survey” tab to be labeled “Progress,”
+so that the tab name matches the project-code and lifecycle content it contains.
+Acceptance criteria
+●      The tab in the proposal detail view reads “Progress” in place of “Survey.”
+●      The change is reflected everywhere the tab is referenced (navigation, deep links, any breadcrumb or analytics label).
+●      No content or behavior on the tab is lost by the rename; existing routes continue to resolve.
+Notes: The base survey itself keeps the name “survey”; only the tab label changes to “Progress.”
+  E2  Automated project code 
+Every proposal receives a standardized project code assembled from four parts and displayed near the proposal title/budget:
+[OrgID]  -  [Project ID]  -  {Phase}  -  {Status}
+The two bracketed parts (OrgID, Project ID) are assigned identifiers; the two brace parts (Phase, Status) are live values that change over the project’s life (see Epic 4).
+E2-S1  Auto-assign the OrgID
+As a system,
+I want to auto-assign an OrgID from the GC-provided list based on the entity the submission comes from,
+so that each proposal is tied to the correct organization without manual entry.
+Acceptance criteria
+●      The OrgID is drawn from a configurable list provided by GC (General Conference) mapping entities to org identifiers.
+●      On submission, the system determines the submitting entity and assigns the matching OrgID automatically.
+●      If the submitting entity has no matching OrgID in the list, the proposal is flagged for manual resolution rather than assigned a blank or default value.
+●      The GC list is maintainable (importable/editable by an admin) without a code deploy.
+Source: OneVoice27_Combined_Register - go to the codes tab to for the list of all the codes. 
+E2-S2  Auto-generate the Project ID
+As a system,
+I want to auto-generate a Project ID in the format OV@@@@### ,
+so that every project has a unique, human-readable identifier.
+Acceptance criteria
+●      Format is OV@@@@### where @@@@ is a 4-letter acronym for the department / division / entity / global project, and ### is a 3-digit proposal number.
+●      Example shape: OVFAMLY007 would not fit (4 letters only) — e.g. OVFAM007. Confirm the exact acronym source (see open question).
+●      The 3-digit proposal number is sequential and zero-padded (001–999); define behavior beyond 999.
+●      The generated Project ID is unique across the system and is not reused.
+●      The Project ID is generated automatically — it is not free-typed by the submitter.
+Source: OneVoice27_Combined_Register - go to the codes tab to for the list of all the codes.
+E2-S3  Display the composite project code
+As a portal user,
+I want to see the full composite code [OrgID] - [Project ID] - {Phase} - {Status} on the proposal,
+so that I can identify the project and its current lifecycle state at a glance.
+Acceptance criteria
+●      The composite code is displayed near the proposal title/budget and on the Progress tab.
+●      The {Phase} and {Status} portions update live whenever those values change (Epic 4).
+●      Before values exist (e.g., phase/status not yet set), the code renders gracefully with a clear placeholder rather than an empty segment.
+●      The composite code and its four component fields are available in the JSON/PDF exports.
+  E3  Secretary approval & lock of the project code 
+The project code is confirmed and frozen by the secretary at final approval. Before approval the secretary can still correct it; after approval it is locked.
+E3-S1  Secretary approves and locks the code at final approval
+As a secretary,
+I want to approve and lock the project code upon final approval,
+so that the official code is fixed and cannot be changed after the project is approved.
+Acceptance criteria
+●      The Progress tab shows an “Approved” control available to the secretary.
+●      Approving locks the project code (OrgID and Project ID); after lock, the code fields become read-only for all users.
+●      The lock action is recorded (who approved/locked and when) — see Epic 5.
+●      Locking the code aligns with the proposal reaching the “Approved” stage in the stepper.
+E3-S2  Secretary can edit the code only before approval
+As a secretary,
+I want to be able to edit the project code only before approvals are completed,
+so that corrections are possible early but the code is protected once locked in.
+Acceptance criteria
+●      Before final approval, the secretary can edit the editable portions of the project code.
+●      Once the proposal is approved/locked, editing is disabled for the secretary and everyone else.
+●      Users without the secretary permission cannot edit the code at any point.
+●      Any pre-approval edit is captured in the audit trail (who and when).
+Open question: Confirm which parts of the code the secretary may edit (e.g., the 4-letter acronym) versus which are fully system-assigned and never editable.
+  E4  Progress tracking: Phase & Status 
+The Progress tab exposes two dropdowns — Phase and Status — that drive the {Phase} and {Status} segments of the composite code and represent where the project sits in its lifecycle.
+E4-S1  Phase dropdown
+As an org team member,
+I want to set the project’s Phase from a fixed dropdown,
+so that the project’s lifecycle stage is recorded consistently.
+Acceptance criteria
+●      Phase options are exactly: Planning, Implementation, Monitoring, Final Evaluation, Closure.
+●      Only one phase can be selected at a time.
+●      The selected phase updates the {Phase} segment of the composite code immediately.
+●      Every phase change is written to the audit trail (Epic 5).
+E4-S2  Status dropdown
+As an org team member,
+I want to set the project’s Status from a fixed dropdown,
+so that the project’s operational state is recorded consistently.
+Acceptance criteria
+●      Status options are exactly: Active, Closed, On Hold.
+●      Only one status can be selected at a time.
+●      The selected status updates the {Status} segment of the composite code immediately.
+●      Every status change is written to the audit trail (Epic 5).
+E4-S3  Org team changes status after final approval
+As an org team member,
+I want to change a project’s status after final approval is complete,
+so that the project’s state stays current through its active life.
+Acceptance criteria
+●      After a proposal reaches final approval, any authorized org team member can change its Phase and Status.
+●      The control is available to org team members (not only the original submitter/approver).
+●      Each change is attributed to the specific user who made it and time-stamped (Epic 5).
+* Phase and Status can only be set only after approval by the submitting team. 
+  E5  Audit trail for phase & status changes 
+Changes to a project’s status (and phase) after approval must be traceable. The portal already has a field-level change log; this audit trail should follow the same pattern.
+E5-S1  Record who changed what and when
+As an org administrator,
+I want every phase and status change recorded with the user and timestamp,
+so that there is an accountable history of how a project’s state changed over time.
+Acceptance criteria
+●      Each phase or status change records: the field changed, the previous value, the new value, the user who made the change, and the date/time.
+●      The secretary’s approval/lock action is also recorded.
+●      Audit entries are immutable — they cannot be edited or deleted through the UI.
+●      Timestamps are stored consistently (recommend UTC stored, displayed in the user’s locale).
+E5-S2  View the audit history
+As an org team member or admin,
+I want to view the history of status and phase changes for a project,
+so that I can see when and by whom each change was made.
+Acceptance criteria
+●      The audit history is viewable from the proposal (Progress tab and/or the existing Change log tab).
+●      Entries are listed most-recent-first and show value-from → value-to, the user, their role, and the timestamp.
+●      The history is included in the exports where appropriate.
+Notes: Reuse the existing change-log component/pattern from the portal for visual and behavioral consistency.
+ 
+End of request — OneVoice27 Proposal Portal, “Progress” tab feature set.
+
+
+  
+
+OneVoice27 Proposal Portal
+Development Request — Reset Reviewer Votes on Return from Realignment
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Type:  Bug fix — review voting / realignment
+Version:  1.0 — Draft for estimation
+
+
+1.  Background & the defect
+When a proposal is sent back for realignment and later returns to review, the reviewer votes from the previous round are carried forward instead of being cleared. In particular, a prior “More information” vote persists, which blocks a clean re-vote: reviewers cannot cleanly move to an Approval decision or re-issue a “More information” request on the revised proposal, because their earlier vote is still counted.
+The expected behavior is that a return from realignment starts a fresh voting round. All previous votes are cleared to a zero count and every reviewer votes again on the revised proposal; previously assigned votes do not carry forward.
+  E1  Reset reviewer votes on return from realignment  
+When a proposal comes back from realignment, clear the prior voting round so reviewers vote fresh on the revised proposal.
+E1-S1  Clear votes to zero when a proposal returns from realignment
+As a reviewer,
+I want all votes reset to zero when a proposal comes back from realignment,
+so that I can vote fresh — approve or request more information — on the revised proposal without an old vote getting in the way.
+Acceptance criteria
+* When a proposal returns from realignment to the review stage, the vote tally is reset to zero for that proposal.
+* All previously assigned votes (Approval and More information) are cleared and do not carry forward into the new round.
+* A prior “More information” vote no longer persists or blocks the new round — reviewers start from a clean slate.
+* Every eligible reviewer is able to vote again on the revised proposal.
+* Each reviewer can cast either an Approval vote or a “More information” vote in the new round.
+* The reset happens automatically on return from realignment — no manual clearing step is required.
+E1-S2  Show a clean voting state and preserve history
+As a reviewer or approver,
+I want the vote count to clearly show the fresh round while the prior round is kept for the record,
+so that the current decision is based only on the new round, without losing the audit trail.
+Acceptance criteria
+* After the reset, the displayed vote count reflects only votes cast in the new (post-realignment) round, starting at zero.
+* A reviewer who already voted in a prior round is prompted/enabled to vote again; their old vote is not shown as their current vote.
+* The previous round’s votes are retained in the history/audit trail (who voted what and when), not silently deleted.
+* Any approval threshold or decision logic evaluates only the current round’s votes.
+Open question: Confirm the reviewer set for the new round — the same reviewers as before, or whoever is assigned at return — and whether a return from realignment can happen more than once (each return resets again).
+
+
+End of request — OneVoice27 Proposal Portal, reset reviewer votes on return from realignment.
+
+
+OneVoice27 Proposal Portal
+Development Request — Private & Shared Proposal Drafts
+Prepared for:  Software development team
+Prepared by:  OneVoice27 / HCI product team
+Date:  August 25, 2026
+Applies to:  The proposal submission portal (draft stage, before submission)
+Version:  1.1 — Draft for estimation (adds global-admin oversight)
+ 
+1.  Purpose
+This request adds a visibility choice to proposal drafts in the OneVoice27 submission portal. When a submitter prepares a draft, they should be able to save it as a private draft (only they can see and edit it) or a shared draft (visible to their whole team, who can view and make adjustments to it).
+The goal is to let teams collaborate on a proposal before it is submitted, while still allowing an individual to work privately until they are ready to open it up. This applies to the draft stage only; once a proposal is submitted it follows the existing review workflow.
+The stories below are grouped into epics and written to be estimated independently. Draft visibility should reuse the portal’s existing roles, design system, and change-log pattern where possible.
+1.1  Definitions
+●      Private draft — visible and editable only by the submitter who created it.
+●      Shared draft — visible to the submitter’s team; team members can view and edit/adjust it.
+●      Team — the group of people a shared draft is exposed to (e.g., the submitter’s org/entity). The exact scope of “team” needs product confirmation (see open questions).
+●      Global admin — a system-level administrator who can view all drafts across the system, private and shared, for oversight (see Epic E6).
+2.  Scope at a glance
+Six epics are in scope. Full stories follow in section 4.
+ 
+Epic
+	Feature
+	Primary actor
+	E1
+	Choose draft visibility (private or shared) when saving
+	Submitter
+	E2
+	Private draft behavior
+	Submitter
+	E3
+	Shared draft — team view & collaborative editing
+	Team members
+	E4
+	Switch a draft between private and shared
+	Draft owner
+	E5
+	Attribution & concurrent-edit handling on shared drafts
+	Team / System
+	E6
+	Global admin oversight of all drafts
+	Global admin
+	3.  Cross-cutting requirements
+●      Visibility applies to the draft stage only; on submission the proposal follows the existing review workflow and permissions.
+●      Visibility must be enforced server-side — a private draft must never be retrievable by anyone but its owner, including via direct link or API.
+●      New draft state and any collaboration UI should reuse the portal’s existing design system and be responsive on mobile.
+●      Drafts (private and shared) should be clearly labeled with their visibility wherever they appear in lists.
+4.  Epics & stories
+  E1  Choose draft visibility when saving 
+When saving a draft, the submitter chooses whether it is private or shared.
+E1-S1  Save a draft as private or shared
+As a submitter,
+I want to choose “Private draft” or “Shared draft” when I save,
+so that I control whether my team can see and work on it.
+Acceptance criteria
+●      The draft save flow offers a clear choice between Private and Shared.
+●      A sensible default is applied (recommend Private) so nothing is exposed unintentionally.
+●      The chosen visibility is saved with the draft and shown on the draft.
+●      The choice is available both when first saving and later while editing.
+E1-S2  See a draft’s visibility at a glance
+As a submitter,
+I want each draft to clearly show whether it is private or shared,
+so that I never mistake one for the other.
+Acceptance criteria
+●      Draft lists and the draft itself display a clear Private/Shared label or icon.
+●      Shared drafts indicate they are visible to the team.
+  E2  Private draft behavior 
+A private draft is the submitter’s own workspace and is invisible to everyone else.
+E2-S1  Keep private drafts visible only to the owner
+As a submitter,
+I want my private draft to be visible and editable only by me,
+so that I can work on it privately until I’m ready.
+Acceptance criteria
+●      A private draft does not appear in any other user’s lists or searches.
+●      Only the owner can open, edit, or delete a private draft.
+●      Access is blocked server-side, including via direct link, for anyone who is not the owner — with the single exception of a global admin, who can view (not necessarily edit) all drafts for oversight (Epic E6).
+  E3  Shared draft — team view & collaborative editing 
+A shared draft is open to the submitter’s team to view and adjust before submission.
+E3-S1  Team members can view a shared draft
+As a team member,
+I want to see shared drafts created by my team,
+so that I’m aware of proposals being prepared and can contribute.
+Acceptance criteria
+●      A shared draft appears for all members of the owner’s team in an appropriate list (e.g., “Team drafts”).
+●      Team members can open and read the full draft.
+●      Non-team users cannot see the shared draft.
+E3-S2  Team members can edit / adjust a shared draft
+As a team member,
+I want to make adjustments to a shared draft,
+so that the team can improve the proposal together before it is submitted.
+Acceptance criteria
+●      Team members can edit the content of a shared draft (same fields the owner can edit).
+●      Edits are saved to the single shared draft so everyone sees the latest version.
+●      It is clear who may submit the final proposal (see open question).
+Open question: Confirm whether any team member can submit a shared draft, or only the original owner / a designated lead; and whether team members can delete a shared draft or only the owner.
+E3-S3  Submit from a shared draft
+As a draft owner (or designated lead),
+I want to submit the shared draft when the team is ready,
+so that the collaborative work becomes an official proposal.
+Acceptance criteria
+●      Submitting a shared draft moves it into the existing review workflow.
+●      On submission, the proposal follows the normal ownership/visibility rules of a submitted proposal (draft-stage sharing no longer applies).
+●      The team can see that the draft has been submitted.
+  E4  Switch a draft between private and shared 
+A draft’s visibility can be changed as the work matures.
+E4-S1  Change visibility of an existing draft
+As a draft owner,
+I want to switch my draft between private and shared,
+so that I can open it to the team when ready, or take it private again.
+Acceptance criteria
+●      The owner can change a private draft to shared, and a shared draft back to private.
+●      When switched to shared, the team gains access immediately; when switched to private, team access is removed immediately.
+●      Each visibility change is recorded (who and when) in the change log.
+●      Only the owner can change visibility and access.
+  E5  Attribution & concurrent-edit handling 
+Shared editing needs light guardrails so contributions are clear and simultaneous edits don’t clobber each other.
+E5-S1  Attribute changes on shared drafts
+As a team member,
+I want to see who last edited a shared draft and when,
+so that the team has visibility into who contributed what.
+Acceptance criteria
+●      A shared draft shows the last editor and last-edited timestamp.
+●      Edits to a shared draft are captured in the change log consistent with the rest of the portal.
+E5-S2  Handle simultaneous edits safely
+As a team member,
+I want the system to prevent my teammates’ and my edits from silently overwriting each other,
+so that no one’s contributions are lost.
+Acceptance criteria
+●      When two people edit the same shared draft, the system prevents silent data loss (e.g., soft-lock, conflict warning, or field-level merge).
+●      If a conflict occurs, the user is warned rather than losing work.
+●      The chosen approach is documented for the team.
+●      Last save wins with an indicator when there are more than two people co-editing at the same time.
+  E6  Global admin oversight of all drafts 
+A global admin needs system-wide visibility of drafts for oversight, regardless of whether a draft is private or shared. This applies only while an item is a draft.
+E6-S1  View all drafts across the system
+As a global admin,
+I want to view all drafts across the system — private and shared,
+so that I have full oversight of what is being prepared before submission.
+Acceptance criteria
+●      The global admin can see every draft in the system, including private drafts owned by other users and shared drafts of every team.
+●      This visibility applies only to items that are still drafts; it does not add any new access to submitted proposals beyond the admin’s existing permissions.
+●      The global admin can open and read the full content of any draft.
+●      Each draft shows its owner, its team (if shared), and its visibility (private/shared) in the admin’s view.
+E6-S2  Find and filter drafts as an admin
+As a global admin,
+I want to browse and filter all drafts,
+so that I can locate a specific draft or review activity efficiently.
+Acceptance criteria
+●      The admin has a view listing all drafts, filterable by owner, team/entity, and visibility (private/shared).
+●      The list reuses the portal’s existing filter and list patterns.
+●      Private drafts are clearly marked as private within the admin view.
+E6-S3  Access is limited to authorized global admins and auditable
+As an organization,
+I want global-admin draft access restricted to authorized admins and recorded,
+so that the ability to see private drafts is controlled and accountable.
+Acceptance criteria
+●      Only users with the global-admin permission can view others’ private drafts; regular admins/submitters cannot. Global admin cannot edit drafts.
+●      The permission is enforced server-side.
+●      Recommended: log when a global admin opens another user’s private draft, for accountability (confirm requirement).
+ 
+End of request — OneVoice27 Proposal Portal, private & shared proposal drafts.
+
+
+[a]Tabled until further discussion is completed.
